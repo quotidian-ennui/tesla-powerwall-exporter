@@ -1,0 +1,10 @@
+name: docker-latest
+
+on:
+  push:
+    branches: master
+
+jobs:
+  build:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    uses: ./.github/workflows/docker-image.yml
