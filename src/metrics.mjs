@@ -7,11 +7,11 @@ const powerwallStateOfCharge = new client.Gauge({
 });
 
 const SystemStatus = {
-  nominal_energy_remaining : new client.Gauge({
+  nominal_energy_remaining: new client.Gauge({
     name: 'tesla_powerwall_nominal_energy_remaining',
     help: 'Powerwall Remaining Charge',
   }),
-  nominal_full_pack_energy : new client.Gauge({
+  nominal_full_pack_energy: new client.Gauge({
     name: 'tesla_powerwall_nominal_full_pack_energy',
     help: 'Powerwall Total capacity',
   }),

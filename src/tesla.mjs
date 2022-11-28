@@ -100,15 +100,14 @@ class Tesla {
   /*
    * Query system status
    */
-    async systemStatus() {
-      try {
-        const response = await Tesla.#request('system_status', 'GET', {}, { Authorization: `Bearer ${this.token}` });
-        return response;
-      } catch (error) {
-        throw new Error(error);
-      }
+  async systemStatus() {
+    try {
+      const response = await Tesla.#request('system_status', 'GET', {}, { Authorization: `Bearer ${this.token}` });
+      return response;
+    } catch (error) {
+      throw new Error(error);
     }
-
+  }
 
   /*
    * Query Powerwall Site metrics

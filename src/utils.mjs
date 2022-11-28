@@ -1,6 +1,6 @@
 import winston from 'winston';
 import {
-  Site, Battery, Load, Solar, powerwallStateOfCharge, SystemStatus
+  Site, Battery, Load, Solar, powerwallStateOfCharge, SystemStatus,
 } from './metrics.mjs';
 
 const { combine, timestamp, json } = winston.format;
