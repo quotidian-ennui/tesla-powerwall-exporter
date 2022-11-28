@@ -3,6 +3,8 @@ name: docker-latest
 on:
   push:
     branches: master
+    tags:
+      - '*'
 
 jobs:
   build:
