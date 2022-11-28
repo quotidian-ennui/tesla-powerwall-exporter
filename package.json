@@ -15,7 +15,7 @@
     "axios": "^0.26.1",
     "express": "^4.17.3",
     "prom-client": "^14.0.1",
-    "retry-axios": "^2.6.0",
+    "retry-axios": "^3.0.0",
     "winston": "^3.6.0"
   },
   "devDependencies": {
