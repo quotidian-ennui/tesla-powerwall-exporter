@@ -1,6 +1,6 @@
 import winston from 'winston';
 import {
-  Site, Battery, Load, Solar, powerwallStateOfCharge,
+  Site, Battery, Load, Solar, powerwallStateOfCharge, SystemStatus
 } from './metrics.mjs';
 
 const { combine, timestamp, json } = winston.format;
@@ -48,6 +48,11 @@ const updateMetrics = async (tesla) => {
 
   const soe = await retryPromiseWithExpotentialDelay(tesla.soe(), 3);
   powerwallStateOfCharge.set(soe.percentage);
+  const systemStatus = await retryPromiseWithExpotentialDelay(tesla.systemStatus(), 3);
+
+  Object.keys(SystemStatus).forEach((metric) => {
+    SystemStatus[metric].set(systemStatus[metric]);
+  });
 
   logger.info('Finished scraping powerwall');
 };

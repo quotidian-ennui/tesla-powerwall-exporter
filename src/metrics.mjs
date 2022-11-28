@@ -6,6 +6,17 @@ const powerwallStateOfCharge = new client.Gauge({
   help: 'The Tesla Powerwall State of Charge',
 });
 
+const SystemStatus = {
+  nominal_energy_remaining : new client.Gauge({
+    name: 'tesla_powerwall_nominal_energy_remaining',
+    help: 'Powerwall Remaining Charge',
+  }),
+  nominal_full_pack_energy : new client.Gauge({
+    name: 'tesla_powerwall_nominal_full_pack_energy',
+    help: 'Powerwall Total capacity',
+  }),
+};
+
 // Tesla Site Metrics
 const Site = {
   instant_power: new client.Gauge({
@@ -213,4 +224,5 @@ export {
   Load,
   Solar,
   powerwallStateOfCharge,
+  SystemStatus,
 };
