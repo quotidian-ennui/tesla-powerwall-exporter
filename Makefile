@@ -5,7 +5,9 @@ ifndef USER
 USER:=$(shell whoami)
 endif
 
-DOCKER_IMAGE_TAG:=$(USER)/powerwall-export:latest
+DOCKER_CONTAINER=powerwall-export
+DOCKER_IMAGE_TAG:=$(USER)/$(DOCKER_CONTAINER):latest
+
 OS_NAME:=$(shell echo $(shell uname -o) | tr A-Z a-z )
 
 help:
@@ -33,13 +35,16 @@ changelog:  ## show git changelog
 docker:  ## docker build
 	docker build . --tag $(DOCKER_IMAGE_TAG)
 
-docker-run: ## run via docker
+docker-run: docker ## run via docker
 ifndef TESLA_PASSWORD
 	$(error No Password for the Tesla gateway defined)
 endif
-	docker run -it --rm \
+	docker run --name $(DOCKER_CONTAINER) \
 		-p 9961:9961 \
 		-e TESLA_ADDR=$(TESLA_ADDR) \
 		-e TESLA_EMAIL=$(TESLA_EMAIL) \
-		-e TESLA_PASSWORD=$(TESLA_PASSWORD) \
+		-e TESLA_PASSWORD=$(TESLA_PASSWORD) -d \
 		$(DOCKER_IMAGE_TAG)
+
+docker-rm:  ## remove docker container
+	docker rm -f $(DOCKER_CONTAINER)
