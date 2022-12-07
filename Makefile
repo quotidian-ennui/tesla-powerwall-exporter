@@ -1,6 +1,10 @@
 .DEFAULT_TARGET: help
 .PHONY:  check_env lint start help docker docker-run
 .SILENT: lint start check_env upgrade docker docker-run
+ifndef USER
+USER:=$(shell whoami)
+endif
+
 DOCKER_IMAGE_TAG:=$(USER)/powerwall-export:latest
 OS_NAME:=$(shell echo $(shell uname -o) | tr A-Z a-z )
 
@@ -23,6 +27,9 @@ start: check_env   ## npm run start
 update: check_env   ## npm upgrade
 	npm update
 
+changelog:  ## show git changelog
+	@git cliff
+
 docker:  ## docker build
 	docker build . --tag $(DOCKER_IMAGE_TAG)
 
@@ -31,7 +38,7 @@ ifndef TESLA_PASSWORD
 	$(error No Password for the Tesla gateway defined)
 endif
 	docker run -it --rm \
-		-e 9961:9961 \
+		-p 9961:9961 \
 		-e TESLA_ADDR=$(TESLA_ADDR) \
 		-e TESLA_EMAIL=$(TESLA_EMAIL) \
 		-e TESLA_PASSWORD=$(TESLA_PASSWORD) \
