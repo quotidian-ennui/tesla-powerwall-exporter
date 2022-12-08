@@ -58,6 +58,7 @@ commit_parsers = [
     { message = "^(ci|build)", group = "<!-- 08 -->CI/CD, Build Environment"},
     { message = "^fix\\(ci|build\\)", group = "<!-- 08 -->CI/CD, Build Environment"},
     { message = "^chore\\(release\\): prepare for", skip = true},
+    { message = "^release", skip = true},
     { message = "^chore", group = "<!-- 09 -->Miscellaneous Tasks"},
 ]
 # filter out the commits that are not matched by commit parsers
