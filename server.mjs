@@ -1,7 +1,7 @@
 import express from 'express';
 import client from 'prom-client';
 import Tesla from './src/tesla.mjs';
-import { updateMetrics, logger } from './src/utils.mjs';
+import { updateMetrics, logger, listenPort } from './src/utils.mjs';
 
 // Disable SSL verification since Tesla use self-signed certificates
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
@@ -25,7 +25,7 @@ app.get('/metrics', async (req, res) => {
   res.status(200).send(await client.register.metrics());
 });
 
-const PORT = parseInt(process.env.PORT, 10) || 9961;
+const PORT = listenPort();
 const SCRAPE_INTERVAL = parseInt(process.env.SCRAPE_INTERVAL, 10) * 1000 || 30000;
 
 ['TESLA_ADDR', 'TESLA_EMAIL', 'TESLA_PASSWORD'].forEach((e) => {

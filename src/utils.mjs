@@ -57,7 +57,17 @@ const updateMetrics = async (tesla) => {
   logger.info('Finished scraping powerwall');
 };
 
+function listenPort() {
+  const envPort = parseInt(process.env.PORT, 10) || 0;
+  const envNodePort = parseInt(process.env.NODE_PORT, 10) || 0;
+  if (envNodePort === 0) {
+    return envPort === 0 ? 9961 : envPort;
+  }
+  return envNodePort;
+}
+
 export {
   updateMetrics,
   logger,
+  listenPort,
 };
