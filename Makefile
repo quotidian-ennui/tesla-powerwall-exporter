@@ -35,16 +35,22 @@ changelog:  ## show git changelog
 docker:  ## docker build
 	docker build . --tag $(DOCKER_IMAGE_TAG)
 
-docker-run: docker ## run via docker
+docker-run: ## run via docker
 ifndef TESLA_PASSWORD
 	$(error No Password for the Tesla gateway defined)
 endif
-	docker run --name $(DOCKER_CONTAINER) \
+	@docker run --name $(DOCKER_CONTAINER) \
 		-p 9961:9961 \
+		-e NODE_PORT=9961 \
+		-e NODE_NO_WARNINGS=1 \
 		-e TESLA_ADDR=$(TESLA_ADDR) \
 		-e TESLA_EMAIL=$(TESLA_EMAIL) \
-		-e TESLA_PASSWORD=$(TESLA_PASSWORD) -d \
+		-e TESLA_PASSWORD=$(TESLA_PASSWORD) \
+		-d \
 		$(DOCKER_IMAGE_TAG)
 
+docker-logs: ## Get logs
+	@docker logs $(DOCKER_CONTAINER)
+
 docker-rm:  ## remove docker container
-	docker rm -f $(DOCKER_CONTAINER)
+	@docker rm -f $(DOCKER_CONTAINER)
