@@ -5,12 +5,7 @@
 header = """
 # Changelog
 
-```
-Ch-ch-changes, just gonna have to be a different man
-Time may change me
-But I can't trace time
-```
-
+> If you're not making a mistake, you're making a mistake - Miles Davis
 """
 # template for the changelog body
 # https://tera.netlify.app/docs/#introduction
