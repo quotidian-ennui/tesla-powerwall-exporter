@@ -1,14 +1,12 @@
 .DEFAULT_TARGET: help
 .PHONY:  check_env lint start help docker docker-run
 .SILENT: lint start check_env upgrade docker docker-run
-ifndef USER
-USER:=$(shell whoami)
-endif
+USER?=$(shell whoami)
 
 DOCKER_CONTAINER=powerwall-export
 DOCKER_IMAGE_TAG:=$(USER)/$(DOCKER_CONTAINER):latest
 
-OS_NAME:=$(shell echo $(shell uname -o) | tr A-Z a-z )
+OS_NAME:=$(shell uname -o | tr '[:upper:]' '[:lower:]' )
 
 help:
 	@grep -E '^[a-zA-Z_-]+.*:.*?## .*$$' $(word 1,$(MAKEFILE_LIST)) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
