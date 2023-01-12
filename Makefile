@@ -1,6 +1,5 @@
+MAKEFLAGS+= --silent --always-make
 .DEFAULT_TARGET: help
-.PHONY:  check_env lint start help docker docker-run
-.SILENT: lint start check_env upgrade docker docker-run
 USER?=$(shell whoami)
 
 DOCKER_CONTAINER=powerwall-export
