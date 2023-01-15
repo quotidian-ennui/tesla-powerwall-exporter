@@ -6,6 +6,7 @@ import {
 const { combine, timestamp, json } = winston.format;
 
 const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
   format: combine(timestamp(), json()),
   transports: [
     new winston.transports.Console(),
@@ -36,7 +37,7 @@ const retryPromiseWithExpotentialDelay = async (promise, retries) => {
  * Query all aggregated metrics
  */
 const updateMetrics = async (tesla) => {
-  logger.info('Scraping powerwall');
+  logger.verbose('Scraping powerwall');
   const metrics = await retryPromiseWithExpotentialDelay(tesla.aggregates(), 3);
 
   [Site, Battery, Load, Solar].forEach((category) => {
@@ -54,7 +55,7 @@ const updateMetrics = async (tesla) => {
     SystemStatus[metric].set(systemStatus[metric]);
   });
 
-  logger.info('Finished scraping powerwall');
+  logger.verbose('Finished scraping powerwall');
 };
 
 function listenPort() {
