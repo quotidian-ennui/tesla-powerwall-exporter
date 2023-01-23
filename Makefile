@@ -20,7 +20,10 @@ endif
 lint: check_env   ## npm run eslint
 	npm run lint
 
-start: check_env   ## npm run start
+clean: ## rm -rf node_modules
+	rm -rf node_modules
+
+start: update   ## npm run start
 	npm run start
 
 update: check_env   ## npm upgrade
