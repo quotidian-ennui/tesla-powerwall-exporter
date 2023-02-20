@@ -1,10 +1,10 @@
-FROM node:16.19.0-alpine AS stage1
+FROM node:16.19.1-alpine AS stage1
 COPY src/ /app/src
 COPY ["package.json", "package-lock.json", "server.mjs", "/app/"]
 WORKDIR /app
 RUN npm install --only=production
 
-FROM node:16.19.0-alpine
+FROM node:16.19.1-alpine
 COPY --from=stage1 /app /app
 WORKDIR /app
 CMD ["npm", "run", "start"]
