@@ -6,6 +6,7 @@ header = """
 # Changelog
 
 > If you're not making a mistake, you're making a mistake - Miles Davis
+
 """
 # template for the changelog body
 # https://tera.netlify.app/docs/#introduction
@@ -45,6 +46,7 @@ commit_parsers = [
     { message = "^fix", group = "<!-- 02 -->Bug Fixes"},
     { message = "^doc", group = "<!-- 03 -->Documentation"},
     { message = "^perf", group = "<!-- 04 -->Performance"},
+    { message = "^refactor\\(ci|build\\)", group = "<!-- 08 -->CI/CD, Build Environment"},
     { message = "^refactor", group = "<!-- 05 -->Refactor"},
     { message = "^test", group = "<!-- 06 -->Testing"},
     { message = "^deps", group = "<!-- 07 -->Dependency Management"},
