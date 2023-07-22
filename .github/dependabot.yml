@@ -9,6 +9,13 @@ updates:
     versioning-strategy: increase
     allow:
       - dependency-type: "all"
+    groups:
+      eslint:
+        patterns:
+          - "eslint*"
+          - "eslint"
+          - "@eslint*"
+          - "@eslint/*"
   - package-ecosystem: "github-actions"
     directory: "/"
     open-pull-requests-limit: 20
