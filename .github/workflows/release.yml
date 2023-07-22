@@ -22,9 +22,24 @@ jobs:
           fetch-depth: 0
       - name: Generate changelog
         uses: orhun/git-cliff-action@v2
-        id: changelog
+        id: git-cliff
         with:
           args: --current
+        env:
+          OUTPUT: CHANGELOG.md
+      - name: Post Process Changelog
+        id: changelog
+        # post processor that changes names to github users.
+        # It will be done when post_processors are enabled in git-cliff (post 1.2.0)
+        run: |
+          POST_PROCESSING=$(mktemp --tmpdir="${RUNNER_TEMP}" changelog.XXXXXXXXXX)
+          cat "${{ steps.git-cliff.outputs.changelog }}" | sed -e "s/Lewin Chan/@quotidian-ennui/g" | sed -e "s/dependabot\[bot\]/@dependabot/g" >"$POST_PROCESSING"
+          eof=$(head -c15 /dev/urandom | base64)
+          {
+            printf "content<<%s\n" "${eof}";
+            cat "$POST_PROCESSING";
+            printf "%s\n" "${eof}";
+          } >> "$GITHUB_OUTPUT"
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
