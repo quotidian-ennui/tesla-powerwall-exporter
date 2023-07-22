@@ -16,7 +16,7 @@
     "express": "^4.18.2",
     "prom-client": "^14.2.0",
     "retry-axios": "^3.0.0",
-    "winston": "^3.9.0"
+    "winston": "^3.10.0"
   },
   "devDependencies": {
     "eslint": "^8.43.0",
