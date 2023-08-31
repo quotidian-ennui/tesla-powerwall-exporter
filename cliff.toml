@@ -7,6 +7,8 @@ header = """
 
 > If you're not making a mistake, you're making a mistake - Miles Davis
 
+It's a docker image so [github package registry](https://github.com/quotidian-ennui/tesla-powerwall-exporter/pkgs/container/tesla-powerwall-exporter) is where the interesting stuff is
+
 """
 # template for the changelog body
 # https://tera.netlify.app/docs/#introduction
