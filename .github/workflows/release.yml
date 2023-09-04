@@ -30,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Generate changelog
-        uses: orhun/git-cliff-action@v2.0.6
+        uses: orhun/git-cliff-action@v2.1.0
         id: git-cliff
         with:
           args: --current
