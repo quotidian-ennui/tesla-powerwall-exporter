@@ -18,7 +18,6 @@ jobs:
     steps:
       - name: Debug Env & Event
         uses: hmarr/debug-action@v2
-
       - name: Dump GitHub context
         run: |
           echo "$GITHUB_CONTEXT"
@@ -31,30 +30,14 @@ jobs:
           fetch-depth: 0
       - name: Generate changelog
         uses: orhun/git-cliff-action@v2.1.0
-        id: git-cliff
+        id: changelog
         with:
           args: --current
         env:
           OUTPUT: CHANGELOG.md
-      - name: Post Process Changelog
-        id: changelog
-        # post processor that changes names to github users.
-        # It will be done when post_processors are enabled in git-cliff (post 1.2.0)
-        # git-cliff was released @ 2023-08-31, but the corresponding action is not yet
-        # updated, mark @ 2.0.6 so dependabot tells us?
-        run: |
-          POST_PROCESSING=$(mktemp --tmpdir="${RUNNER_TEMP}" changelog.XXXXXXXXXX)
-          RELEASE_NAME="$(echo "${GITHUB_REF#refs/tags/}" | tr / -)"
-          cat "${{ steps.git-cliff.outputs.changelog }}" \
-            | sed -e "s/Lewin Chan/@quotidian-ennui/g" \
-            | sed -e "s/dependabot\[bot\]/@dependabot/g" \
-          >"$POST_PROCESSING"
-          # shellcheck disable=SC2129
-          echo "changelog=$POST_PROCESSING" >> "$GITHUB_OUTPUT"
-          echo "release=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
-      - name: Create github release
-        id: github-release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${{ steps.changelog.outputs.release }}" --verify-tag --latest --notes-file "${{ steps.changelog.outputs.changelog }}"
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          bodyFile: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          makeLatest: true
