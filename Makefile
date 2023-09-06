@@ -15,7 +15,7 @@ check_env:
 ifeq ($(OS_NAME),msys)
 	$(error Not running node under windows, switch to WSL2)
 endif
-	@which npm
+	@which npm >/dev/null 2>&1
 
 lint: check_env   ## npm run eslint
 	npm run lint
@@ -23,14 +23,17 @@ lint: check_env   ## npm run eslint
 clean: ## rm -rf node_modules
 	rm -rf node_modules
 
-start: update   ## npm run start
+start: install   ## npm run start
 	npm run start
 
-update: check_env   ## npm upgrade
-	npm update
+install: check_env   ## npm install
+	npm install
+
+bump: check_env   ## npm bump version
+	npm version patch --git-tag-version=false
 
 changelog:  ## show git changelog
-	@git cliff
+	@git cliff --unreleased
 
 docker:  ## docker build
 	docker build . --tag $(DOCKER_IMAGE_TAG)
