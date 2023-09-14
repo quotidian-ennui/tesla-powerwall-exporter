@@ -75,6 +75,11 @@ release version="patch" push="localonly": check_npm_env
 @install: check_npm_env
   npm install
 
+# Cleanup
+@clean:
+  rm -rf node_modules
+  -docker images | grep -e "^<none>" -e "{{ DOCKER_CONTAINER }}" | awk '{print $3}' | xargs -r docker rmi
+
 [private]
 [no-cd]
 [no-exit-message]
