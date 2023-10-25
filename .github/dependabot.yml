@@ -14,8 +14,29 @@ updates:
         patterns:
           - "eslint*"
           - "eslint"
+          - "es-abstract"
+          - "es-abstract*"
+          - "es-*"
           - "@eslint*"
           - "@eslint/*"
+      babel:
+        patterns:
+          - "@babel*"
+          - "@babel/*"
+      types:
+        patterns:
+          - "@types*"
+          - "@types/*"
+      prototype:
+        patterns:
+          - "string.prototype"
+          - "string.prototype*"
+          - "iterator.prototype"
+          - "iterator.prototype*"
+          - "arraybuffer.prototype"
+          - "arraybuffer.prototype.*"
+          - "array.prototype"
+          - "array.prototype.*"
   - package-ecosystem: "github-actions"
     directory: "/"
     open-pull-requests-limit: 20
