@@ -3,19 +3,61 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
-    open-pull-requests-limit: 20
+    open-pull-requests-limit: 50
     schedule:
       interval: "daily"
     versioning-strategy: increase
     allow:
       - dependency-type: "all"
     groups:
-      eslint:
+      # I'm beginning to understand why people just
+      # use '*' for npm dependencies.
+      # WTAH?
+      dev-dependencies:
         patterns:
           - "eslint*"
           - "eslint"
+          - "es-abstract"
+          - "es-abstract*"
+          - "es-*"
           - "@eslint*"
           - "@eslint/*"
+          - "flat-cache"
+          - "define-*"
+          - "keyv"
+          - "flatted"
+          - "globals"
+          - "resolve"
+          - "@humanwhocodes*"
+          - "@humanwhocodes/*"
+          - "@babel*"
+          - "@babel/*"
+          - "string.prototype"
+          - "string.prototype*"
+          - "iterator.prototype"
+          - "iterator.prototype*"
+          - "arraybuffer.prototype"
+          - "arraybuffer.prototype.*"
+          - "array.prototype"
+          - "array.prototype.*"
+          - "array-includes"
+          - "axe-core"
+          - "safe-array-concat"
+          - "has-property-descriptors"
+          - "which-typed-array"
+          - "internal-slot"
+          - "is-core-module"
+          - "has"
+          - "get-intrinsic"
+      winston:
+        patterns:
+          - "winston"
+          - "winston-*"
+      types:
+        patterns:
+          - "@types*"
+          - "@types/*"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     open-pull-requests-limit: 20
