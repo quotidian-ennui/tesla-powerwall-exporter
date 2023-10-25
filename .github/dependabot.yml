@@ -14,8 +14,19 @@ updates:
         patterns:
           - "eslint*"
           - "eslint"
+          - "es-abstract"
+          - "es-abstract*"
+          - "es-*"
           - "@eslint*"
           - "@eslint/*"
+      babel:
+        patterns:
+          - "@babel*"
+          - "@babel/*"
+      types:
+        patterns:
+          - "@types*"
+          - "@types/*"
   - package-ecosystem: "github-actions"
     directory: "/"
     open-pull-requests-limit: 20
