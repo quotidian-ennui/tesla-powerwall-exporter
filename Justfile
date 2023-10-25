@@ -47,6 +47,14 @@ docker +args="build":
       ;;
   esac
 
+# Requires git@github.com:quotidian-ennui/gitscripts or git@github.com:mcwarman/gitscripts
+# Do it locally w/o pushing changes so that we can at least test the changes locally
+# first.
+# Attempt to do a dependabot-merge
+@dependabot:
+  git dependabot-merge -f npm_and_yarn -a
+
+
 # Do a release
 release version="patch" push="localonly": check_npm_env
   #!/usr/bin/env bash
