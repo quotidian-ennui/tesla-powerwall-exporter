@@ -52,7 +52,7 @@ docker +args="build":
 # first.
 # Attempt to do a dependabot-merge
 @dependabot:
-  git dependabot-merge -f npm_and_yarn -a
+  git dependabot-merge -f npm_and_yarn
 
 
 # Do a release
