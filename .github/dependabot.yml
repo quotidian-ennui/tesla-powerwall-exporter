@@ -51,6 +51,7 @@ updates:
           - "get-intrinsic"
           - "acorn"
           - "acorn-*"
+          - "punycode"
       winston:
         patterns:
           - "winston"
