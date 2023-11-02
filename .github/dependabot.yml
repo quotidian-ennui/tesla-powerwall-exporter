@@ -15,7 +15,7 @@ updates:
       # WTAH?
       dev-dependencies:
         patterns:
-          - "eslint*"
+          - "eslint-*"
           - "eslint"
           - "es-abstract"
           - "es-abstract*"
@@ -41,17 +41,20 @@ updates:
           - "array.prototype"
           - "array.prototype.*"
           - "array-includes"
-          - "axe-core"
           - "safe-array-concat"
           - "has-property-descriptors"
           - "which-typed-array"
           - "internal-slot"
           - "is-core-module"
           - "has"
+          - "has-*"
           - "get-intrinsic"
           - "acorn"
           - "acorn-*"
           - "punycode"
+          - "language-tags"
+          - "axe-*"
+          - "ast-*"
       winston:
         patterns:
           - "winston"
