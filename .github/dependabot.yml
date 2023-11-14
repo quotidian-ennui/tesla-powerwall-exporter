@@ -55,14 +55,12 @@ updates:
           - "language-tags"
           - "axe-*"
           - "ast-*"
+          - "@types*"
+          - "@types/*"
       winston:
         patterns:
           - "winston"
           - "winston-*"
-      types:
-        patterns:
-          - "@types*"
-          - "@types/*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
