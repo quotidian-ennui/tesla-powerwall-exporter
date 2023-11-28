@@ -10,57 +10,21 @@ updates:
     allow:
       - dependency-type: "all"
     groups:
-      # I'm beginning to understand why people just
-      # use '*' for npm dependencies.
-      # WTAH?
+      # It does seem to me that trying to make npm dependencies
+      # play nice with each other is a fool's errand.  I'm going
+      # just hopefully use dependency-type to group all the
+      # transitive deps from running eslint into a single thing
       dev-dependencies:
-        patterns:
-          - "eslint-*"
-          - "eslint"
-          - "es-abstract"
-          - "es-abstract*"
-          - "es-*"
-          - "@eslint*"
-          - "@eslint/*"
-          - "flat-cache"
-          - "define-*"
-          - "keyv"
-          - "flatted"
-          - "globals"
-          - "resolve"
-          - "@humanwhocodes*"
-          - "@humanwhocodes/*"
-          - "@babel*"
-          - "@babel/*"
-          - "string.prototype"
-          - "string.prototype*"
-          - "iterator.prototype"
-          - "iterator.prototype*"
-          - "arraybuffer.prototype"
-          - "arraybuffer.prototype.*"
-          - "array.prototype"
-          - "array.prototype.*"
-          - "array-includes"
-          - "safe-array-concat"
-          - "has-property-descriptors"
-          - "which-typed-array"
-          - "internal-slot"
-          - "is-core-module"
-          - "has"
-          - "has-*"
-          - "get-intrinsic"
-          - "acorn"
-          - "acorn-*"
-          - "punycode"
-          - "language-tags"
-          - "axe-*"
-          - "ast-*"
-          - "@types*"
-          - "@types/*"
+        dependency-type: "development"
       winston:
         patterns:
           - "winston"
           - "winston-*"
+      axios:
+        patterns:
+          - "axios"
+          - "axios-*"
+          - "retry-axios"
 
   - package-ecosystem: "github-actions"
     directory: "/"
