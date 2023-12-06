@@ -1,6 +1,6 @@
 {
   "name": "tesla",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "description": "Tesla Powerwall Exporter",
   "main": "server.js",
   "scripts": {
