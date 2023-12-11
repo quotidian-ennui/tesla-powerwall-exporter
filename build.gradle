@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'io.quarkus'
+    id 'io.freefair.lombok' version '8.4'
+    id 'jacoco'
+}
+
+repositories {
+  mavenCentral()
+  mavenLocal()
+}
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation 'io.quarkus:quarkus-scheduler'
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+    implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.quarkus:quarkus-qute'
+    implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
+    implementation 'io.quarkus:quarkus-config-yaml'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'org.apache.commons:commons-text:1.11.0'
+    testImplementation 'io.quarkus:quarkus-junit5'
+}
+
+group 'io.github.quotidianennui'
+version '2.0.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+test {
+    systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+}
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+lombok.disableConfig = true
+quarkusRun.dependsOn build
+
+

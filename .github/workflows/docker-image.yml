@@ -9,11 +9,22 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
+    - name: Set up JDK
+      uses: actions/setup-java@v4.0.0
+      with:
+        java-version: 21
+        distribution: 'temurin'
+    - name: Gradle Build
+      uses: gradle/gradle-build-action@v2.10.0
+      id: gradle
+      with:
+        gradle-version: wrapper
+        arguments: build
     - name: docker-build-push
       uses: quotidian-ennui/actions-olio/docker-image-builder@main
       with:
         registry_push: true
-        dockerfile: Dockerfile
+        dockerfile: ./src/main/docker/Dockerfile.jvm
         image_platforms: linux/amd64,linux/arm64/v8
         ghcr_image_name: ghcr.io/${{ github.repository }}
         ghcr_user: ${{ github.repository_owner }}

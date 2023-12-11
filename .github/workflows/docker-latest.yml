@@ -2,7 +2,9 @@ name: docker-latest
 
 on:
   push:
-    branches: master
+    branches:
+      - master
+      - quarkus
     tags:
       - '*'
   workflow_dispatch:
