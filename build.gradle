@@ -1,13 +1,26 @@
 plugins {
     id 'java'
     id 'io.quarkus'
-    id 'io.freefair.lombok' version '8.4'
     id 'jacoco'
+    id 'io.freefair.lombok' version '8.4'
+    id 'com.github.jmongard.git-semver-plugin' version '0.11.0'
+}
+
+ext {
 }
 
 repositories {
   mavenCentral()
   mavenLocal()
+}
+
+semver {
+    // see https://github.com/jmongard/Git.SemVersioning.Gradle
+    groupVersionIncrements = true
+    noDirtyCheck = true
+    gitDirectory = project.projectDir
+    createReleaseCommit = false
+    createReleaseTag = true
 }
 
 dependencies {
@@ -24,7 +37,7 @@ dependencies {
 }
 
 group 'io.github.quotidianennui'
-version '2.0.0-SNAPSHOT'
+version semver.version
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21

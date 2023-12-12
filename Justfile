@@ -31,11 +31,11 @@ docker +args="build": check_tesla_env
     logs)
       docker logs -f "{{ DOCKER_CONTAINER }}"
       ;;
-    run)
+    run|start)
       just check_tesla_env
       docker run --name "{{ DOCKER_CONTAINER }}" \
           -p 9961:9961 \
-          -e NODE_PORT=9961 \
+          -e QUARKUS_HTTP_PORT=9961 \
           -e TESLA_ADDR="$TESLA_ADDR" \
           -e TESLA_EMAIL="$TESLA_EMAIL" \
           -e TESLA_PASSWORD="$TESLA_PASSWORD" \
@@ -49,21 +49,16 @@ docker +args="build": check_tesla_env
       ;;
   esac
 
-# # Do a release
-# release version="patch" push="localonly": check_npm_env
-#   #!/usr/bin/env bash
-#   set -eo pipefail
-#   npm_tag_name=$(npm version "{{ version }}" --git-tag-version=false)
-#   modified_files=$(git diff --name-only)
-#   for file in $modified_files; do
-#     git add "$file"
-#   done
-#   git commit -m"chore(release): mark next version ${npm_tag_name/v/}"
-#   git tag "${npm_tag_name/v/}"
-#   if [[ "{{ push }}" == "push" ]]; then
-#     git push --all
-#     git push --tags
-#   fi
+# Do a release
+release version="patch" push="localonly":
+  #!/usr/bin/env bash
+  set -eo pipefail
+
+  ./gradlew releaseVersion
+  if [[ "{{ push }}" == "push" ]]; then
+    git push --all
+    git push --tags
+  fi
 
 # Cleanup
 @clean:
