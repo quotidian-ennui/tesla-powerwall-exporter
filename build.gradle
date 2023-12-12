@@ -16,6 +16,7 @@ repositories {
 
 semver {
     // see https://github.com/jmongard/Git.SemVersioning.Gradle
+    patchPattern = "\\A(chore|fix|refactor|deps)(?:\\([^()]+\\))?:"
     groupVersionIncrements = true
     noDirtyCheck = true
     gitDirectory = project.projectDir
