@@ -50,7 +50,7 @@ docker +args="build": check_tesla_env
   esac
 
 # Do a release
-release version="patch" push="localonly":
+release push="localonly":
   #!/usr/bin/env bash
   set -eo pipefail
 
