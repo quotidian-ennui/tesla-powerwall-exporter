@@ -14,7 +14,7 @@ OS_NAME:=`uname -o | tr '[:upper:]' '[:lower:]'`
   git cliff --unreleased
 
 # Use Docker to build/run
-docker +args="build": check_tesla_env
+docker +args="build":
   #!/usr/bin/env bash
   set -eo pipefail
 
@@ -25,31 +25,24 @@ docker +args="build": check_tesla_env
       ./gradlew build
       docker build -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
       ;;
-    stop)
-    	docker rm -f "{{ DOCKER_CONTAINER }}"
-      ;;
-    logs)
-      docker logs -f "{{ DOCKER_CONTAINER }}"
-      ;;
     run|start)
       just check_tesla_env
-      docker run --name "{{ DOCKER_CONTAINER }}" \
+      docker run --rm --name "{{ DOCKER_CONTAINER }}" \
           -p 9961:9961 \
           -e QUARKUS_HTTP_PORT=9961 \
           -e TESLA_ADDR="$TESLA_ADDR" \
           -e TESLA_EMAIL="$TESLA_EMAIL" \
           -e TESLA_PASSWORD="$TESLA_PASSWORD" \
           -e LOG_LEVEL=DEBUG \
-          -d \
           "{{ DOCKER_IMAGE_TAG }}"
       ;;
     *)
       echo "Unknown action: $action"
-      echo "Try: build | run | logs | stop"
+      echo "Try: build | run "
       ;;
   esac
 
-# Do a release
+# Tag & release
 release push="localonly":
   #!/usr/bin/env bash
   set -eo pipefail
@@ -62,16 +55,20 @@ release push="localonly":
 
 # Cleanup
 @clean:
-  rm -rf node_modules
-  ./gradlew clean
+  rm -rf node_modules build bin
   -docker images | grep -e "^<none>" -e "{{ DOCKER_CONTAINER }}" | awk '{print $3}' | xargs -r docker rmi
 
+# ./gradlew build
 @build:
   ./gradlew build
 
+# ./gradlew quarkusDev
 @dev: check_tesla_env
   ./gradlew -Dorg.gradle.console=plain quarkusDev
 
+# ./gradlew quarkusRun
+@run: check_tesla_env
+  ./gradlew -Dorg.gradle.console=plain build quarkusRun
 
 [private]
 [no-cd]
