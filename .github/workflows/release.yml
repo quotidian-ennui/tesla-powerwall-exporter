@@ -8,7 +8,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -16,27 +15,19 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Debug Env & Event
-        uses: hmarr/debug-action@v2
-      - name: Dump GitHub context
-        run: |
-          echo "$GITHUB_CONTEXT"
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
       - name: Generate changelog
-        uses: orhun/git-cliff-action@v2.3.0
+        uses: orhun/git-cliff-action@b7913b664658dd091d9971658cb02a19047baa79 # v2.3.0
         id: changelog
         with:
           args: --current
         env:
           OUTPUT: CHANGELOG.md
       - name: Create Release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@6c75be85e571768fa31b40abf38de58ba0397db5 # v1.13.0
         with:
           bodyFile: ${{ steps.changelog.outputs.changelog }}
           draft: false

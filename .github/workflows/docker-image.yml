@@ -3,31 +3,32 @@ name: docker-image
 on:
   workflow_call:
 
+
 jobs:
   docker-build-image:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4.1.1
-      with:
-        fetch-depth: 0
-    - name: Set up JDK
-      uses: actions/setup-java@v4.0.0
-      with:
-        java-version: 21
-        distribution: 'temurin'
-    - name: Gradle Build
-      uses: gradle/gradle-build-action@v2.10.0
-      id: gradle
-      with:
-        gradle-version: wrapper
-        arguments: build
-    - name: docker-build-push
-      uses: quotidian-ennui/actions-olio/docker-image-builder@main
-      with:
-        registry_push: true
-        dockerfile: ./src/main/docker/Dockerfile.jvm
-        image_platforms: linux/amd64,linux/arm64/v8
-        ghcr_image_name: ghcr.io/${{ github.repository }}
-        ghcr_user: ${{ github.repository_owner }}
-        ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - name: Gradle Build
+        uses: gradle/gradle-build-action@8cbcb9948b5892387aed077daf6f90e1f0ba5b27 # v2.11.0
+        id: gradle
+        with:
+          gradle-version: wrapper
+          arguments: build
+      - name: docker-build-push
+        uses: quotidian-ennui/actions-olio/docker-image-builder@4cf73cf3316249d1cde4317eee302c4076b45a06 # main
+        with:
+          registry_push: true
+          dockerfile: ./src/main/docker/Dockerfile.jvm
+          image_platforms: linux/amd64,linux/arm64/v8
+          ghcr_image_name: ghcr.io/${{ github.repository }}
+          ghcr_user: ${{ github.repository_owner }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
