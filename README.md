@@ -2,7 +2,7 @@
 
 Prometheus exporter for Tesla Powerwall and Solar.
 
-The original fork branch is still called 'master'; this branch is an attempt to replicate the same functionality using Java + Quarkus.
+The original fork branch is preserved as 'npm'; this now replicates the same functionality using Java + Quarkus.
 
 There's no reason for it; things are pretty much the same but I was interested in finding out if how many lines of code it would take to do roughly the same thing in Java. As it turns out, not too many more, bearing in mind the verbosity of Java. I've held closely to the way it was in the original in terms of logic; stylistically it is different.
 
@@ -32,7 +32,7 @@ $ export TESLA_EMAIL="myemail@myhost.com"
 $ export TESLA_PASSWORD="MySecretPassword"
 # Java of course, has a lot of logging. In production mode, DEBUG only impacts "io.github.qe.*" classes.
 $ export LOG_LEVEL=DEBUG
-# default is 9961, as per the original NODE_PORT -> QUARKUS_HTTP_PORT
+# default is 9961, as per the original but NODE_PORT -> QUARKUS_HTTP_PORT
 $ export QUARKUS_HTTP_PORT=9963
 $ ./gradlew -Dorg.gradle.console=plain -Dquarkus.package.type=uber-jar build
 $ java -jar build/tesla-powerwall-exporter-2.0.0-SNAPSHOT-runner.jar
