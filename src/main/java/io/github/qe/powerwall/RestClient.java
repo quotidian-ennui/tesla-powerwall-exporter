@@ -73,7 +73,7 @@ public class RestClient {
 
   private void assertStatus(int httpCode) {
     switch (httpCode) {
-      case 403 -> loggedIn = false;
+      case 403, 401 -> loggedIn = false;
       case 200 -> { }
       default -> throw new IllegalStateException("Status code " + httpCode);
     }

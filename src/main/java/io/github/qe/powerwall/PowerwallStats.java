@@ -81,6 +81,11 @@ public class PowerwallStats {
     powerwallStats.putAll(extract(Metrics.system, tesla.get("system_status")));
   }
 
+  @Scheduled(cron = "${powerwall.login.cron:0 15 09 * * ?}")
+  void login() {
+    tesla.login();
+  }
+
   private void initMicrometer() {
     for (Metrics metric : Metrics.values()) {
       for (String key : metric.keyMap().keySet()) {
