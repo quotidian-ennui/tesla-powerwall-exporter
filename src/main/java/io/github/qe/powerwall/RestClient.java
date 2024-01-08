@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.time.Duration;
 import java.util.Map;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -17,6 +18,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class RestClient {
 
   private final WebClient client;
+  private static final Duration MAX_WAIT = Duration.ofSeconds(30);
   private static final String loginJson = """
       {
         "clientInfo": {
@@ -32,6 +34,7 @@ public class RestClient {
   @ConfigProperty(name = "TESLA_EMAIL")
   private String email;
   @ConfigProperty(name = "TESLA_ADDR")
+  @Getter
   private String gatewayAddress;
 
   private String token;
@@ -53,7 +56,7 @@ public class RestClient {
         .onItem().transform(r -> {
           assertStatus(r.statusCode());
           return r.bodyAsJsonObject().getString("token");
-        }).await().atMost(Duration.ofSeconds(30));
+        }).await().atMost(MAX_WAIT);
     loggedIn = true;
   }
 
@@ -64,7 +67,7 @@ public class RestClient {
         .transform(r -> {
           assertStatus(r.statusCode());
           return r.bodyAsJsonObject().getMap();
-        }).await().atMost(Duration.ofSeconds(30));
+        }).await().atMost(MAX_WAIT);
   }
 
   private String uri(String uri) {

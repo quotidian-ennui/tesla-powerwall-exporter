@@ -12,8 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
+@Slf4j
 public class PowerwallStats {
 
   @Inject
@@ -83,6 +85,7 @@ public class PowerwallStats {
 
   @Scheduled(cron = "${powerwall.login.cron:0 15 09 * * ?}")
   void login() {
+    log.info("Scheduled login refresh [{}]", tesla.getGatewayAddress());
     tesla.login();
   }
 
