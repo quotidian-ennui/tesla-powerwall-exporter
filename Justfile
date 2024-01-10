@@ -14,11 +14,11 @@ OS_NAME:=`uname -o | tr '[:upper:]' '[:lower:]'`
   git cliff --unreleased
 
 # Use Docker to build/run
-docker +args="build":
+docker action="build":
   #!/usr/bin/env bash
   set -eo pipefail
 
-  action=$1
+  action="{{ action }}"
   if [[ "$#" -ne "0" ]]; then shift; fi
   case "$action" in
     build)
@@ -47,11 +47,16 @@ release push="localonly":
   #!/usr/bin/env bash
   set -eo pipefail
 
+  push="{{ push }}"
   ./gradlew releaseVersion
-  if [[ "{{ push }}" == "push" ]]; then
-    git push --all
-    git push --tags
-  fi
+  case "$push" in
+    push|github)
+      git push --all
+      git push --tags
+      ;;
+    *)
+      ;;
+  esac
 
 # Cleanup
 @clean:
