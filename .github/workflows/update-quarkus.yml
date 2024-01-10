@@ -1,0 +1,61 @@
+name: quarkus-update
+on:
+  workflow_dispatch: null
+  schedule:
+    - cron: '15 03 * * MON'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PR_GITHUB_USER: qe-repo-updater[bot] <152897211+qe-repo-updater[bot]@users.noreply.github.com>
+
+jobs:
+  quarkus:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+      - name: Get Token
+        uses: actions/create-github-app-token@2986852ad836768dfea7781f31828eb3e17990fa # v1.6.2
+        id: app-token
+        with:
+          app-id: ${{ vars.WORKFLOW_UPDATE_APP_ID }}
+          private-key: ${{ secrets.WORKFLOW_UPDATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - name: Set up JDK
+        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - name: Gradle Build
+        uses: gradle/gradle-build-action@982da8e78c05368c70dac0351bb82647a9e9a5d2 # v2.11.1
+        id: gradle
+        with:
+          gradle-version: wrapper
+          arguments: quarkusUpdate
+      - name: Quarkus Release
+        id: latestQuarkus
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh release list --repo quarkusio/quarkus --exclude-drafts --exclude-pre-releases | awk '{print $1}' | sort -rV | head -n 1)
+          echo "release=$latest" >> "$GITHUB_OUTPUT"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 # v5.0.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          committer: ${{ env.PR_GITHUB_USER }}
+          author: ${{ env.PR_GITHUB_USER }}
+          commit-message: "deps: bump quarkus to ${{ steps.latestQuarkus.outputs.release }}"
+          branch: deps/quarkus-${{ steps.latestQuarkus.outputs.release }}
+          title: "deps: bump quarkus to ${{ steps.latestQuarkus.outputs.release }}"
+          body: |
+            Automated upgrade to Quarkus ${{ steps.latestQuarkus.outputs.release }}.
+
+            [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).
