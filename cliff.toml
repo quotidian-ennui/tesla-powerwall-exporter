@@ -70,6 +70,7 @@ commit_parsers = [
     { message = "^chore\\(deps\\)", group = "<!-- 99 -->:pushpin: Dependency Management"},
     { message = "^chore\\(release\\):", skip = true},
     { message = "^release:", skip = true},
+    { message = "^Merge branch '", skip = true},
     { message = "^chore", group = "<!-- 10 -->:broom: Miscellaneous Tasks"},
     { body = ".*security", group = "<!-- 00 -->:lock: Security"},
     { message = ".*", group = "<!--80-->Uncategorised" },
