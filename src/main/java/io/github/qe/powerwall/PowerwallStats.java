@@ -89,6 +89,7 @@ public class PowerwallStats {
     tesla.login();
   }
 
+  @SuppressWarnings({"codeql[java/uncaught-number-format-exception]"})
   private void initMicrometer() {
     for (Metrics metric : Metrics.values()) {
       for (String key : metric.keyMap().keySet()) {
