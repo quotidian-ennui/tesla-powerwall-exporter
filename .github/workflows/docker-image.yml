@@ -3,7 +3,6 @@ name: docker-image
 on:
   workflow_call:
 
-
 jobs:
   docker-build-image:
     runs-on: ubuntu-latest
@@ -21,8 +20,13 @@ jobs:
         uses: gradle/gradle-build-action@982da8e78c05368c70dac0351bb82647a9e9a5d2 # v2.11.1
         id: gradle
         with:
-          gradle-version: wrapper
-          arguments: build
+          dependency-graph: generate-and-submit
+      - name: Build
+        id: build
+        run: |
+          ./gradlew build
+        env:
+          DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: runtimeClasspath
       - name: docker-build-push
         uses: quotidian-ennui/actions-olio/docker-image-builder@4cf73cf3316249d1cde4317eee302c4076b45a06 # main
         with:
