@@ -47,8 +47,8 @@ public class RestClient {
     this.client = WebClient.create(vertx, opt);
   }
 
-  public void login() {
-    log.debug("Login to {}", gatewayAddress);
+  public void login(boolean forcedLogging) {
+    logging(forcedLogging, "Login to {}", gatewayAddress);
     Buffer buffer = Buffer.buffer(
         Qute.fmt(loginJson).data("email", email).data("password", password)
             .render(), "UTF-8");
@@ -57,17 +57,20 @@ public class RestClient {
           assertStatus(r.statusCode());
           return r.bodyAsJsonObject().getString("token");
         }).await().atMost(MAX_WAIT);
+    logging(forcedLogging, "Login Successful");
     loggedIn = true;
   }
 
-  public Map<String, Object> get(String api) {
-    if (!loggedIn) login();
-    log.debug("Scraping {}", api);
-    return client.getAbs(uri(api)).putHeader("Authorization", "Bearer " + token).send().onItem()
+  public Map<String, Object> get(String api, boolean forcedLogging) {
+    if (!loggedIn) login(forcedLogging);
+    logging(forcedLogging, "Scraping {}", api);
+    Map<String, Object> result = client.getAbs(uri(api)).putHeader("Authorization", "Bearer " + token).send().onItem()
         .transform(r -> {
           assertStatus(r.statusCode());
           return r.bodyAsJsonObject().getMap();
         }).await().atMost(MAX_WAIT);
+    logging(forcedLogging, "Scraped {}", api);
+    return result;
   }
 
   private String uri(String uri) {
@@ -78,8 +81,18 @@ public class RestClient {
     switch (httpCode) {
       case 403, 401 -> loggedIn = false;
       case 200 -> { }
-      default -> throw new IllegalStateException("Status code " + httpCode);
+      default -> {
+        loggedIn = false;
+        throw new IllegalStateException("Unexpected Status code " + httpCode);
+      }
     }
   }
 
+  private void logging(boolean forced, String msg, Object... args) {
+    if (forced) {
+      log.info(msg, args);
+    } else {
+      log.debug(msg, args);
+    }
+  }
 }

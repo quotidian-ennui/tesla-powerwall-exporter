@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +22,7 @@ public class PowerwallStats {
   @Inject
   private RestClient tesla;
   private final MeterRegistry registry;
-
+  private final AtomicBoolean lastFailed = new AtomicBoolean(false);
   private final Map<String, Object> powerwallStats = new HashMap<>();
   private static final List<String> AGGREGATE_STAT_KEYS = List.of("instant_power",
       "instant_reactive_power", "instant_apparent_power", "frequency", "energy_exported",
@@ -74,19 +75,31 @@ public class PowerwallStats {
 
   @Scheduled(every = "{powerwall.scrape.interval}")
   void collect() {
-    Map<String, Object> aggregate = tesla.get("meters/aggregates");
-    powerwallStats.putAll(extract(Metrics.site, aggregate));
-    powerwallStats.putAll(extract(Metrics.load, aggregate));
-    powerwallStats.putAll(extract(Metrics.battery, aggregate));
-    powerwallStats.putAll(extract(Metrics.solar, aggregate));
-    powerwallStats.putAll(extract(Metrics.percentage, tesla.get("system_status/soe")));
-    powerwallStats.putAll(extract(Metrics.system, tesla.get("system_status")));
+    try {
+      Map<String, Object> aggregate = tesla.get("meters/aggregates", lastFailed.get());
+      powerwallStats.putAll(extract(Metrics.site, aggregate));
+      powerwallStats.putAll(extract(Metrics.load, aggregate));
+      powerwallStats.putAll(extract(Metrics.battery, aggregate));
+      powerwallStats.putAll(extract(Metrics.solar, aggregate));
+      powerwallStats.putAll(extract(Metrics.percentage, tesla.get("system_status/soe", lastFailed.get())));
+      powerwallStats.putAll(extract(Metrics.system, tesla.get("system_status", lastFailed.get())));
+      lastFailed.set(false);
+    } catch (Exception e) {
+      lastFailed.set(true);
+      log.error("Failed to scrape powerwall", e);
+    }
   }
 
   @Scheduled(cron = "${powerwall.login.cron:0 15 09 * * ?}")
   void login() {
-    log.info("Scheduled login refresh [{}]", tesla.getGatewayAddress());
-    tesla.login();
+    try {
+      log.info("Scheduled login refresh [{}]", tesla.getGatewayAddress());
+      tesla.login(lastFailed.get());
+      lastFailed.set(false);
+    } catch (Exception e) {
+      lastFailed.set(true);
+      log.error("Login failed", e);
+    }
   }
 
   @SuppressWarnings({"codeql[java/uncaught-number-format-exception]"})
