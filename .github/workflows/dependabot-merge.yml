@@ -1,0 +1,160 @@
+name: dependabot-pr
+run-name: Merge Dependabot PR (${{ github.event.client_payload.detail.pull_request }})
+on:
+  repository_dispatch:
+    types:
+      - pr-trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  statuses: write
+
+jobs:
+  bootstrap:
+    name: Pipeline Bootstrap
+    runs-on: ubuntu-latest
+    outputs:
+      status_context: "Gradle Check"
+      is_pr: ${{ steps.compute.outputs.is_pr }}
+      is_dependabot_pr: ${{ steps.compute.outputs.is_dependabot_pr }}
+      label_prefix: "build_"
+      actions_modified: ${{ steps.changes.outputs.workflows_any_changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: ${{ github.event.client_payload.base.ref }}
+      - name: Changed Files
+        # Attempt to figure out what files have changed
+        id: changes
+        uses: tj-actions/changed-files@90a06d6ba9543371ab4df8eeca0be07ca6054959 # v42.0.2
+        with:
+          files_yaml: |
+            workflows:
+              - ".github/workflows/**"
+      - name: Compute Activities
+        id: compute
+        run: |
+          if [[ "${{ github.event.client_payload.detail.pull_request }}" != "" ]]
+          then
+            echo "is_pr=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "is_pr=false"  >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "${{ github.event.client_payload.detail.pull_request }}" != "" && "${{ github.event.client_payload.base.actor }}" == "dependabot[bot]" ]]
+          then
+            echo "is_dependabot_pr=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "is_dependabot_pr=false"  >> "$GITHUB_OUTPUT"
+          fi
+  gradle:
+    runs-on: ubuntu-latest
+    needs:
+      - bootstrap
+    name: Gradle Check
+    steps:
+      - name: Build Pending
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@v0.1.0
+        if: |
+          needs.bootstrap.outputs.is_pr == 'true' &&
+          github.event.client_payload.base.sha != ''
+        with:
+          state: pending
+          sha: ${{ github.event.client_payload.base.sha }}
+          context: ${{ needs.bootstrap.outputs.status_context }}
+          label_prefix: ${{ needs.bootstrap.outputs.label_prefix }}
+      - name: Checkout branch
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: ${{ github.event.client_payload.base.ref }}
+      - name: Set up JDK
+        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+        with:
+          java-version: 21
+          distribution: "temurin"
+      - name: Execute Gradle Check
+        # actually doesn't do anything other than assert than things compile
+        uses: gradle/gradle-build-action@982da8e78c05368c70dac0351bb82647a9e9a5d2 # v2.11.1
+        id: gradle
+        with:
+          gradle-version: wrapper
+          arguments: check
+        env:
+          JDK_JAVA_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
+      - name: Build Result
+        if: |
+          (success() || failure()) &&
+          needs.bootstrap.outputs.is_pr == 'true' &&
+          github.event.client_payload.base.sha != ''
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@v0.1.0
+        with:
+          state: ${{ steps.gradle.outcome }}
+          sha: ${{ github.event.client_payload.base.sha }}
+          context: ${{ needs.bootstrap.outputs.status_context }}
+          label_prefix: ${{ needs.bootstrap.outputs.label_prefix }}
+  actions_merge:
+    runs-on: ubuntu-latest
+    name: Dependabot Merge (action changes)
+    needs:
+      - bootstrap
+      - gradle
+    if: |
+      needs.bootstrap.outputs.is_dependabot_pr == 'true' &&
+      needs.bootstrap.outputs.actions_modified == 'true'
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: ${{ github.event.client_payload.base.ref }}
+      - name: Allow merge on semver-minor
+        id: allow_merge
+        run: |
+          function patch_or_minor() {
+            local update_type=${1/version-update:/}
+            case "$update_type" in
+            semver-patch|semver-minor) return 0;;
+            *) return 1;;
+            esac
+          }
+          # shellcheck disable=SC2091
+          if patch_or_minor "${{ github.event.client_payload.detail.dependabot_update_type }}"
+          then
+            echo "automerge=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "automerge=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: "Create Token"
+        uses: actions/create-github-app-token@c4fa18d55c5d49e6a2793e351ea4938322c61072 # v1.6.4
+        id: app-token
+        with:
+          app-id: ${{ vars.WORKFLOW_UPDATE_APP_ID }}
+          private-key: ${{ secrets.WORKFLOW_UPDATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - name: Update PR with Automerge comment
+        id: comment
+        uses: quotidian-ennui/actions-olio/pr-or-issue-comment@da869dde1ba7d5ba0aaa10e94f4c8fce3a8adae0 # v0.1.0
+        with:
+          issue_number: ${{ github.event.client_payload.detail.pull_request }}
+          body: |
+            :dependabot: Attempt Merge: ${{ steps.allow_merge.outputs.automerge }}
+
+            | Decision Table | Value |
+            | ------ | ------ |
+            |Automerge allowed up to| semver-minor |
+            |Update Type| ${{ github.event.client_payload.detail.dependabot_update_type }} |
+            |is_dependabot| ${{ needs.bootstrap.outputs.is_dependabot_pr }} |
+            |action changes| ${{ needs.bootstrap.outputs.actions_modified }} |
+          token: ${{ secrets.GITHUB_TOKEN }}
+          search_term: "dependabot-action-automerge-status"
+      - name: Dependabot Merge
+        continue-on-error: true
+        if: |
+          startsWith(github.event.client_payload.base.ref, 'dependabot') &&
+          steps.allow_merge.outputs.automerge == 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr review --approve "${{ github.event.client_payload.detail.pull_request }}"
+          gh pr merge -r "${{ github.event.client_payload.detail.pull_request }}"
