@@ -29,7 +29,7 @@ jobs:
         env:
           DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: runtimeClasspath
       - name: docker-build-push
-        uses: quotidian-ennui/actions-olio/docker-image-builder@da869dde1ba7d5ba0aaa10e94f4c8fce3a8adae0 # v0.1.0
+        uses: quotidian-ennui/actions-olio/docker-image-builder@main
         with:
           registry_push: true
           dockerfile: ./src/main/docker/Dockerfile.jvm
