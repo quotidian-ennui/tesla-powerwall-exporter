@@ -39,15 +39,17 @@ jobs:
         with:
           java-version: 21
           distribution: "temurin"
-      - name: Execute Gradle Check
-        # actually doesn't do anything other than assert than things compile
-        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa # v2.12.0
-        id: gradle
+      - name: Setup Gradle
+        id: setup_gradle
+        uses: gradle/actions/setup-gradle@ec92e829475ac0c2315ea8f9eced72db85bb337a # v3.0.0
         with:
           gradle-version: wrapper
-          arguments: check
+      - name: Gradle
+        id: gradle
         env:
           JDK_JAVA_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
+        run: |
+          ./gradlew check
       - name: Build Result
         if: |
           (success() || failure()) &&
