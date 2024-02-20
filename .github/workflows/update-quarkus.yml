@@ -55,9 +55,9 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           committer: ${{ env.PR_GITHUB_USER }}
           author: ${{ env.PR_GITHUB_USER }}
-          commit-message: "deps: bump quarkus to ${{ steps.latestQuarkus.outputs.release }}"
+          commit-message: "deps(java): bump quarkus to ${{ steps.latestQuarkus.outputs.release }}"
           branch: deps/quarkus-${{ hashFiles('**/gradle.properties') }}
-          title: "deps: bump quarkus to ${{ steps.latestQuarkus.outputs.release }}"
+          title: "deps(java): bump quarkus to ${{ steps.latestQuarkus.outputs.release }}"
           labels: dependencies
           reviewers: ${{ github.repository_owner }}
           body: |
