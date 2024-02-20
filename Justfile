@@ -48,7 +48,9 @@ release push="localonly":
   set -eo pipefail
 
   push="{{ push }}"
-  ./gradlew releaseVersion
+  tag=$(./gradlew -Dorg.gradle.console=plain releaseVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+$")
+  echo "Release: $tag"
+  git tag -a "$tag" -m "release: $tag"
   case "$push" in
     push|github)
       git push --all

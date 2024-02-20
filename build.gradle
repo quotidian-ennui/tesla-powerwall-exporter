@@ -21,7 +21,7 @@ semver {
     noDirtyCheck = true
     gitDirectory = project.projectDir
     createReleaseCommit = false
-    createReleaseTag = true
+    createReleaseTag = false
 }
 
 dependencies {
