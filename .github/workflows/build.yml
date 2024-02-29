@@ -1,5 +1,5 @@
-name: dependabot-pr
-run-name: Merge Dependabot PR (${{ github.event.client_payload.detail.pull_request }})
+name: build
+run-name: Assess PR (${{ github.event.client_payload.detail.pull_request }})
 on:
   repository_dispatch:
     types:
