@@ -8,16 +8,16 @@ on:
 env:
   STATUS_CONTEXT: "Gradle Check"
   LABEL_PREFIX: "build_"
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  statuses: write
 
 jobs:
   gradle:
     runs-on: ubuntu-latest
     name: Gradle Check
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      statuses: write
     steps:
       - name: Build Pending
         uses: quotidian-ennui/actions-olio/commit-status-and-label@main
@@ -65,6 +65,8 @@ jobs:
   dependabot_merge:
     runs-on: ubuntu-latest
     name: Dependabot Merge
+    permissions:
+      contents: read
     needs:
       - gradle
     steps:
