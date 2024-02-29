@@ -61,9 +61,10 @@ jobs:
           sha: ${{ github.event.client_payload.base.sha }}
           context: ${{ env.STATUS_CONTEXT }}
           label_prefix: ${{ env.LABEL_PREFIX }}
-  actions_merge:
+
+  dependabot_merge:
     runs-on: ubuntu-latest
-    name: Dependabot Merge (action changes)
+    name: Dependabot Merge
     needs:
       - gradle
     steps:
@@ -79,9 +80,19 @@ jobs:
           private-key: ${{ secrets.WORKFLOW_UPDATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: "${{ github.event.repository.name}}"
-      - name: Dependabot Merge
-        id: dependabot_merge
+      - name: Repository Action Merge
+        id: action_merge
         uses: quotidian-ennui/actions-olio/dependabot-merge@main
         with:
           token: ${{ steps.app-token.outputs.token }}
           change_filter: ".github/workflows/**"
+          merge_commentary: "Merge Workflow Actions"
+      - name: Dependabot Merge
+        id: merge_gradle_dependencies
+        uses: quotidian-ennui/actions-olio/dependabot-merge@main
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          change_filter: "**/build.gradle,**/build.gradle.kts"
+          automerge_level: "semver-patch"
+          merge_commentary: "Merge Gradle Dependencies"
+          filter_separator: ","
