@@ -8,16 +8,16 @@ on:
 env:
   STATUS_CONTEXT: "Gradle Check"
   LABEL_PREFIX: "build_"
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  statuses: write
 
 jobs:
   gradle:
     runs-on: ubuntu-latest
     name: Gradle Check
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      statuses: write
     steps:
       - name: Build Pending
         uses: quotidian-ennui/actions-olio/commit-status-and-label@main
@@ -62,11 +62,34 @@ jobs:
           context: ${{ env.STATUS_CONTEXT }}
           label_prefix: ${{ env.LABEL_PREFIX }}
 
+  dependency_review:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    name: Dependency Review
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: ${{ github.event.client_payload.base.ref }}
+          fetch-depth: 0
+      - name: "Dependency Review"
+        uses: actions/dependency-review-action@9129d7d40b8c12c1ed0f60400d00c92d437adcce # v4.1.3
+        with:
+          comment-summary-in-pr: true
+          vulnerability-check: true
+          license-check: true
+          fail-on-severity: moderate
+
   dependabot_merge:
     runs-on: ubuntu-latest
     name: Dependabot Merge
+    permissions:
+      contents: read
     needs:
       - gradle
+      - dependency_review
     steps:
       - name: Checkout branch
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
