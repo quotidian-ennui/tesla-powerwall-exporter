@@ -3,7 +3,7 @@ plugins {
     id 'io.quarkus'
     id 'jacoco'
     id 'io.freefair.lombok' version '8.6'
-    id 'com.github.jmongard.git-semver-plugin' version '0.12.5'
+    id 'com.github.jmongard.git-semver-plugin' version '0.12.6'
 }
 
 ext {
