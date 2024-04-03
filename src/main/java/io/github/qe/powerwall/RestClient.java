@@ -54,11 +54,11 @@ public class RestClient {
             .render(), "UTF-8");
     token = client.postAbs(uri("login/Basic")).sendBuffer(buffer)
         .onItem().transform(r -> {
-          assertStatus(r.statusCode());
+          assertStatus(r.statusCode(), true);
           return r.bodyAsJsonObject().getString("token");
         }).await().atMost(MAX_WAIT);
     logging(forcedLogging, "Login Successful");
-    loggedIn = true;
+    loggedIn = token != null;
   }
 
   public Map<String, Object> get(String api, boolean forcedLogging) {
@@ -66,7 +66,7 @@ public class RestClient {
     logging(forcedLogging, "Scraping {}", api);
     Map<String, Object> result = client.getAbs(uri(api)).putHeader("Authorization", "Bearer " + token).send().onItem()
         .transform(r -> {
-          assertStatus(r.statusCode());
+          assertStatus(r.statusCode(), false);
           return r.bodyAsJsonObject().getMap();
         }).await().atMost(MAX_WAIT);
     logging(forcedLogging, "Scraped {}", api);
@@ -77,9 +77,14 @@ public class RestClient {
     return String.format("https://%s/api/%s", gatewayAddress, uri);
   }
 
-  private void assertStatus(int httpCode) {
+  private void assertStatus(int httpCode, boolean failOn400) {
     switch (httpCode) {
-      case 403, 401 -> loggedIn = false;
+      case 403, 401 -> {
+        loggedIn = false;
+        if (failOn400) {
+          throw new IllegalStateException("Forbidden " + httpCode);
+        }
+      }
       case 200 -> { }
       default -> {
         loggedIn = false;
