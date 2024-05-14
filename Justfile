@@ -1,6 +1,9 @@
 set positional-arguments := true
-DOCKER_CONTAINER := "powerwall-export"
-DOCKERFILE := justfile_directory() / "src/main/docker/Dockerfile.jvm"
+DOCKER_CONTAINER:= "powerwall-export"
+DOCKERFILE:= justfile_directory() / "src/main/docker/Dockerfile.jvm"
+DOCKERFILE_NATIVE:= justfile_directory() / "src/main/docker/Dockerfile.native"
+DOCKERFILE_CGR:= justfile_directory() / "src/main/docker/Dockerfile.cgr"
+
 DOCKER_IMAGE_TAG := `whoami` / DOCKER_CONTAINER + ":latest"
 OS_NAME:=`uname -o | tr '[:upper:]' '[:lower:]'`
 
@@ -23,7 +26,15 @@ docker action="build":
   case "$action" in
     build)
       ./gradlew build
-      docker build -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
+      docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
+      ;;
+    native)
+      ./gradlew build -Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker
+      docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_NATIVE }}" .
+      ;;
+    chainguard|cgr)
+      ./gradlew build -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
+      docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_CGR }}" .
       ;;
     run|start)
       just check_tesla_env
@@ -38,7 +49,7 @@ docker action="build":
       ;;
     *)
       echo "Unknown action: $action"
-      echo "Try: build | run "
+      echo "Try: build | run | native | chainguard"
       ;;
   esac
 

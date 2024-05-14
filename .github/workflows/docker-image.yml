@@ -3,7 +3,6 @@ name: docker-image
 on:
   workflow_call:
 
-
 jobs:
   docker-build-image:
     runs-on: ubuntu-latest
@@ -16,7 +15,7 @@ jobs:
         uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
         with:
           java-version: 21
-          distribution: 'temurin'
+          distribution: "temurin"
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@db19848a5fa7950289d3668fb053140cf3028d43 # v3.3.2
         id: gradle
@@ -25,14 +24,14 @@ jobs:
       - name: Build
         id: build
         run: |
-          ./gradlew build
+          ./gradlew build -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
         env:
           DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: runtimeClasspath
       - name: docker-build-push
         uses: quotidian-ennui/actions-olio/docker-image-builder@main
         with:
           registry_push: true
-          dockerfile: ./src/main/docker/Dockerfile.jvm
+          dockerfile: ./src/main/docker/Dockerfile.cgr
           image_platforms: linux/amd64,linux/arm64/v8
           ghcr_image_name: ghcr.io/${{ github.repository }}
           ghcr_user: ${{ github.repository_owner }}
