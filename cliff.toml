@@ -63,7 +63,7 @@ commit_preprocessors = [
 
 # regex for parsing and grouping commits
 commit_parsers = [
-    { message = "^feat\\(tf\\)", group = "<!-- 09 -->🏙️ Terraform"},
+    { message = "^feat\\(tf\\)", group = "<!-- 09 -->🏭 Terraform"},
     { message = "^feat\\(ci|build\\)", group = "<!-- 07 -->👷 Build Environment"},
     { message = "^feat", group = "<!-- 01 -->✨ Features"},
     { message = "^fixup!", skip = true},
@@ -71,7 +71,7 @@ commit_parsers = [
     { message = "^fix", group = "<!-- 02 -->🐛 Bug Fixes"},
     { message = "^doc", group = "<!-- 03 -->📝 Documentation"},
     { message = "^perf", group = "<!-- 04 -->⚡ Performance"},
-    { message = "^refactor\\(tf\\)", group = "<!-- 09 -->🏙️ Terraform"},
+    { message = "^refactor\\(tf\\)", group = "<!-- 09 -->🏭 Terraform"},
     { message = "^refactor\\(ci|build\\)", group = "<!-- 07 -->👷 Build Environment"},
     { message = "^refactor", group = "<!-- 05 -->♻️ Refactoring"},
     { message = "^lint", group = "<!-- 05 -->♻️ Refactoring"},
