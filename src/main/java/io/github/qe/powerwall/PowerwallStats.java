@@ -30,7 +30,7 @@ public class PowerwallStats {
     initMicrometer();
   }
 
-  @Scheduled(every = "{powerwall.scrape.interval}")
+  @Scheduled(every = "${powerwall.scrape.interval}")
   void collect() {
     try {
       Map<String, Object> aggregate = tesla.get("meters/aggregates", lastFailed.get());
@@ -63,7 +63,7 @@ public class PowerwallStats {
     for (Metrics metric : Metrics.values()) {
       for (String key : metric.keyMap().keySet()) {
         Gauge.builder(key, powerwallStats,
-            (stats) -> Double.parseDouble(stats.getOrDefault(key, 0).toString()))
+            stats -> Double.parseDouble(stats.getOrDefault(key, 0).toString()))
           .description(capitalizeFully(key.replace("_", " ")))
           .register(registry);
       }

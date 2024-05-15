@@ -1,11 +1,15 @@
 package io.github.qe.powerwall;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMockBuilder;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import java.util.Map;
 
@@ -86,20 +90,24 @@ public class MockPowerwallEndpoint implements QuarkusTestResourceLifecycleManage
 
   @Override
   public Map<String, String> start() {
-    wiremockServer = new WireMockServer();
+    WireMockConfiguration cfg = WireMockConfiguration.wireMockConfig().templatingEnabled(true)
+      .dynamicHttpsPort().dynamicPort();
+    wiremockServer = new WireMockServer(cfg);
     wiremockServer.start();
-    wiremockServer.stubFor(post(urlEqualTo("/api/login/Basic")).willReturn(
-      aResponse().withHeader("Content-Type", "application/json").withBody(TOKEN)));
-    wiremockServer.stubFor(get(urlEqualTo("/api/meters/aggregates")).willReturn(
-      aResponse().withHeader("Content-Type", "application/json").withBody(METERS_JSON)));
-    wiremockServer.stubFor(get(urlEqualTo("/api/system_status")).willReturn(
-      aResponse().withHeader("Content-Type", "application/json").withBody(SYSTEM_JSON)));
-    wiremockServer.stubFor(get(urlEqualTo("/api/system_status/soe")).willReturn(
-      aResponse().withHeader("Content-Type", "application/json").withBody(SYSTEM_SOE_JSON)));
+    wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic"))
+      .willReturn(okJson(TOKEN)));
+    wiremockServer.givenThat(get(urlEqualTo("/api/meters/aggregates")).willReturn(
+      okJson(METERS_JSON)));
+    wiremockServer.givenThat(get(urlEqualTo("/api/system_status")).willReturn(
+      okJson(SYSTEM_JSON)));
+    wiremockServer.givenThat(get(urlEqualTo("/api/system_status/soe")).willReturn(
+      okJson(SYSTEM_SOE_JSON)));
 
     return Map.ofEntries(Map.entry("powerwall.gateway.server", wiremockServer.baseUrl()),
       Map.entry("powerwall.gateway.login", "example@example.com"),
-      Map.entry("powerwall.gateway.pw", "password"));
+      Map.entry("powerwall.gateway.pw", "password"),
+      Map.entry("quarkus.scheduler.enabled", "false")
+      );
   }
 
   @Override

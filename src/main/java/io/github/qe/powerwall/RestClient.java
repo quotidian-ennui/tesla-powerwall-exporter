@@ -47,7 +47,7 @@ public class RestClient {
     this.client = WebClient.create(vertx, opt);
   }
 
-  public void login(boolean forcedLogging) {
+  public boolean login(boolean forcedLogging) {
     logging(forcedLogging, "Login to {}", gatewayAddress);
     Buffer buffer = Buffer.buffer(
         Qute.fmt(loginJson).data("email", email).data("password", password)
@@ -59,6 +59,7 @@ public class RestClient {
         }).await().atMost(MAX_WAIT);
     logging(forcedLogging, "Login Successful");
     loggedIn = token != null;
+    return loggedIn;
   }
 
   public Map<String, Object> get(String api, boolean forcedLogging) {

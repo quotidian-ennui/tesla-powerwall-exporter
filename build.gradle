@@ -25,16 +25,17 @@ semver {
 }
 
 dependencies {
-    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
-    implementation 'io.quarkus:quarkus-scheduler'
-    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
-    implementation 'io.quarkus:quarkus-arc'
-    implementation 'io.quarkus:quarkus-qute'
-    implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
-    implementation 'org.slf4j:slf4j-api'
-    implementation 'org.apache.commons:commons-text'
-    testImplementation 'io.quarkus:quarkus-junit5'
-    testImplementation 'org.wiremock:wiremock:3.5.4'
+  implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+  implementation 'io.quarkus:quarkus-scheduler'
+  implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+  implementation 'io.quarkus:quarkus-arc'
+  implementation 'io.quarkus:quarkus-qute'
+  implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
+  implementation 'org.slf4j:slf4j-api'
+  implementation 'org.apache.commons:commons-text'
+  testImplementation 'io.quarkus:quarkus-junit5'
+  testImplementation 'org.wiremock:wiremock:3.5.4'
+  testImplementation("io.quarkus:quarkus-jacoco")
 }
 
 group 'io.github.quotidianennui'
