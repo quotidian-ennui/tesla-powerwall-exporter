@@ -53,6 +53,8 @@ java {
 
 test {
   systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+  // quarkus.jacoco.report=false in app.properties
+  // since we want jacocolog to emit its data
   finalizedBy jacocoTestReport
   jacoco {
     // Force it into the same location as quarkus.
@@ -65,8 +67,6 @@ jacocoTestReport {
   reports {
     xml.required = true
     html.required = true
-    // Force it into the same location as quarkus.
-    html.outputLocation = layout.buildDirectory.dir('jacoco-report')
   }
 }
 
