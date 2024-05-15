@@ -29,11 +29,11 @@ public class RestClient {
         "username": "customer"
       }""";
 
-  @ConfigProperty(name = "TESLA_PASSWORD")
+  @ConfigProperty(name = "powerwall.gateway.pw")
   private String password;
-  @ConfigProperty(name = "TESLA_EMAIL")
+  @ConfigProperty(name = "powerwall.gateway.login")
   private String email;
-  @ConfigProperty(name = "TESLA_ADDR")
+  @ConfigProperty(name = "powerwall.gateway.server")
   @Getter
   private String gatewayAddress;
 
@@ -74,7 +74,7 @@ public class RestClient {
   }
 
   private String uri(String uri) {
-    return String.format("https://%s/api/%s", gatewayAddress, uri);
+    return String.format("%s/api/%s", gatewayAddress, uri);
   }
 
   private void assertStatus(int httpCode, boolean failOn400) {
