@@ -1,17 +1,17 @@
 package io.github.qe.powerwall;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.github.qe.powerwall.Profiles.NotFound;
+import io.github.qe.powerwall.Profiles.NoToken;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-@TestProfile(NotFound.class)
-public class NotFoundTest {
+@TestProfile(NoToken.class)
+public class NoTokenTest {
 
   @Inject
   RestClient client;
@@ -30,9 +30,7 @@ public class NotFoundTest {
 
   @Test
   void testClient() {
-    assertThrows(IllegalStateException.class,
-        () -> client.get("system_status/soe", false));
+    Map<String, Object> result = client.get("system_status/soe", false);
+    assertEquals(0, result.size());
   }
-
-
 }

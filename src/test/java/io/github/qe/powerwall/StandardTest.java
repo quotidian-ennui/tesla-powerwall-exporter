@@ -11,6 +11,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
+// Can't mix and match multiple wiremocks with QuarkusTestResource
+// @QuarkusTestResource(PowerwallEndpoint.Standard.class)
 @TestProfile(Standard.class)
 public class StandardTest {
 

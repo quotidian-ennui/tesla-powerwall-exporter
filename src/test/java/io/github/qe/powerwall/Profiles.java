@@ -20,7 +20,6 @@ public abstract class Profiles implements QuarkusTestProfile {
     }
   }
 
-  // @see PowerwallEndpoint.SemiBroken
   public static class NotFound extends Profiles  {
 
     @Override
@@ -33,6 +32,13 @@ public abstract class Profiles implements QuarkusTestProfile {
     @Override
     public List<TestResourceEntry> testResources() {
       return Collections.singletonList(new TestResourceEntry(PowerwallEndpoint.Forbidden.class));
+    }
+  }
+
+  public static class NoToken extends Profiles  {
+    @Override
+    public List<TestResourceEntry> testResources() {
+      return Collections.singletonList(new TestResourceEntry(PowerwallEndpoint.NoToken.class));
     }
   }
 
