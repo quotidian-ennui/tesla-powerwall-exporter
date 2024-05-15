@@ -55,13 +55,9 @@ public class BasicGauge {
     "instant_total_current");
 
   public static Map<String, Object> extract(Metrics metrics, Map<String, Object> stats) {
-    Map<String, Object> result = new HashMap<>();
-    Map<String,Object> item = metrics.navigateTo(stats);
-    for (Map.Entry<String, String> entry : metrics.keyMap().entrySet()) {
-      if (item.containsKey(entry.getValue())) {
-        result.put(entry.getKey(), item.get(entry.getValue()));
-      }
-    }
-    return result;
+    Map<String, Object> item = metrics.navigateTo(stats);
+    return metrics.keyMap().entrySet().stream()
+      .filter(entry -> item.containsKey(entry.getValue()))
+      .collect(Collectors.toMap(Map.Entry::getKey, entry -> item.get(entry.getValue())));
   }
 }
