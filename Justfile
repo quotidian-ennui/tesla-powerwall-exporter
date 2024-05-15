@@ -6,6 +6,7 @@ DOCKERFILE_CGR:= justfile_directory() / "src/main/docker/Dockerfile.cgr"
 
 DOCKER_IMAGE_TAG := `whoami` / DOCKER_CONTAINER + ":latest"
 OS_NAME:=`uname -o | tr '[:upper:]' '[:lower:]'`
+alias check:=test
 
 # show recipes
 [private]
@@ -97,6 +98,7 @@ build style="jar":
       ;;
   esac
 
+# ./gradlew check
 @test:
   ./gradlew check
 
