@@ -14,10 +14,14 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 @ApplicationScoped
 @Slf4j
 public class PowerwallStats {
+
+  private static final Marker TRANSIENT = MarkerFactory.getMarker("TRANSIENT_FAILURE");
 
   @Inject
   private RestClient tesla;
@@ -42,7 +46,7 @@ public class PowerwallStats {
       lastFailed.set(false);
     } catch (Exception e) {
       lastFailed.set(true);
-      log.error("Failed to scrape powerwall", e);
+      log.info(TRANSIENT, "Failed to scrape powerwall", e);
     }
   }
 
@@ -54,7 +58,7 @@ public class PowerwallStats {
       lastFailed.set(false);
     } catch (Exception e) {
       lastFailed.set(true);
-      log.error("Login failed", e);
+      log.info(TRANSIENT, "Scheduled Login failed", e);
     }
   }
 

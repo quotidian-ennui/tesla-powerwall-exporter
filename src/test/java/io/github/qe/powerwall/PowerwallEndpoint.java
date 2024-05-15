@@ -2,32 +2,29 @@ package io.github.qe.powerwall;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMockBuilder;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import java.util.Map;
 
-public class MockPowerwallEndpoint implements QuarkusTestResourceLifecycleManager {
-
-  private WireMockServer wiremockServer;
-  private static final String TOKEN = """
+public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleManager {
+  public static final String TOKEN = """
     { "token" : "123456" }
     """;
 
   // https://github.com/vloschiavo/powerwall2/blob/master/samples/21.44-foogod/running/system_status.soe.json
-  private static final String SYSTEM_SOE_JSON = """
+  public static final String SYSTEM_SOE_JSON = """
     { "percentage": 42.415190953701725 }
     """;
 
   // https://github.com/vloschiavo/powerwall2/blob/master/samples/21.44-foogod/running/meters.aggregates.json
   // but delete the unsued fields.
-  private static final String METERS_JSON = """
+  public static final String METERS_JSON = """
     {
       "site": {
         "instant_power": 72,
@@ -78,7 +75,7 @@ public class MockPowerwallEndpoint implements QuarkusTestResourceLifecycleManage
 
   // cut down from
   // https://github.com/vloschiavo/powerwall2/blob/master/samples/21.44-foogod/running/system_status.json
-  private static final String SYSTEM_JSON = """
+  public static final String SYSTEM_JSON = """
     {
       "command_source": "Configuration",
       "nominal_full_pack_energy": 14061,
@@ -88,32 +85,66 @@ public class MockPowerwallEndpoint implements QuarkusTestResourceLifecycleManage
     }
     """;
 
-  @Override
-  public Map<String, String> start() {
-    WireMockConfiguration cfg = WireMockConfiguration.wireMockConfig().templatingEnabled(true)
-      .dynamicHttpsPort().dynamicPort();
-    wiremockServer = new WireMockServer(cfg);
-    wiremockServer.start();
-    wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic"))
-      .willReturn(okJson(TOKEN)));
-    wiremockServer.givenThat(get(urlEqualTo("/api/meters/aggregates")).willReturn(
-      okJson(METERS_JSON)));
-    wiremockServer.givenThat(get(urlEqualTo("/api/system_status")).willReturn(
-      okJson(SYSTEM_JSON)));
-    wiremockServer.givenThat(get(urlEqualTo("/api/system_status/soe")).willReturn(
-      okJson(SYSTEM_SOE_JSON)));
-
-    return Map.ofEntries(Map.entry("powerwall.gateway.server", wiremockServer.baseUrl()),
-      Map.entry("powerwall.gateway.login", "example@example.com"),
-      Map.entry("powerwall.gateway.pw", "password"),
-      Map.entry("quarkus.scheduler.enabled", "false")
-      );
-  }
+  protected WireMockServer wiremockServer;
 
   @Override
   public void stop() {
     if (wiremockServer != null) {
       wiremockServer.stop();
+    }
+  }
+
+  @Override
+  public Map<String, String> start() {
+    WireMockConfiguration cfg = WireMockConfiguration.wireMockConfig().templatingEnabled(true)
+        .dynamicHttpsPort().dynamicPort();
+    wiremockServer = new WireMockServer(cfg);
+    wiremockServer.start();
+    configureWiremock();
+    return Map.ofEntries(Map.entry("powerwall.gateway.server", wiremockServer.baseUrl()),
+        Map.entry("powerwall.gateway.login", "example@example.com"),
+        Map.entry("powerwall.gateway.pw", "password"),
+        Map.entry("quarkus.scheduler.enabled", "false")
+    );
+  }
+
+  protected abstract void configureWiremock();
+
+  public static class Standard extends PowerwallEndpoint {
+    @Override
+    protected void configureWiremock() {
+      wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic"))
+          .willReturn(okJson(TOKEN)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/meters/aggregates")).willReturn(
+          okJson(METERS_JSON)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/system_status")).willReturn(
+          okJson(SYSTEM_JSON)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/system_status/soe")).willReturn(
+          okJson(SYSTEM_SOE_JSON)));
+    }
+  }
+
+  // Mostly work but will return 404 when we get the state of energy.
+  public static class NotFound extends PowerwallEndpoint {
+    @Override
+    protected void configureWiremock() {
+      wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic"))
+          .willReturn(okJson(TOKEN)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/meters/aggregates")).willReturn(
+          okJson(METERS_JSON)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/system_status")).willReturn(
+          okJson(SYSTEM_JSON)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/system_status/soe")).willReturn(
+          notFound()));
+    }
+  }
+
+  // Nothing works because you cannot login.
+  public static class Forbidden extends PowerwallEndpoint {
+    @Override
+    protected void configureWiremock() {
+      wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic"))
+          .willReturn(forbidden()));
     }
   }
 }

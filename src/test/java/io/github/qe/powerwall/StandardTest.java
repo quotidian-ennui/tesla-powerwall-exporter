@@ -1,21 +1,18 @@
 package io.github.qe.powerwall;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import io.github.qe.powerwall.BasicGauge.Metrics;
-import io.quarkus.test.common.QuarkusTestResource;
+import io.github.qe.powerwall.Profiles.Standard;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-@QuarkusTestResource(MockPowerwallEndpoint.class)
-public class PowerwallTest {
+@TestProfile(Standard.class)
+public class StandardTest {
 
   @Inject
   RestClient client;
@@ -86,6 +83,5 @@ public class PowerwallTest {
   void testAppLogin() {
     stats.login();
   }
-
 
 }
