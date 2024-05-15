@@ -1,9 +1,10 @@
 plugins {
-    id 'java'
-    id 'io.quarkus'
-    id 'jacoco'
-    id 'io.freefair.lombok' version '8.6'
-    id 'com.github.jmongard.git-semver-plugin' version '0.12.6'
+  id 'java'
+  id 'io.quarkus'
+  id 'io.freefair.lombok' version '8.6'
+  id 'com.github.jmongard.git-semver-plugin' version '0.12.6'
+  id 'jacoco'
+  id 'org.barfuin.gradle.jacocolog' version '3.1.0'
 }
 
 ext {
@@ -15,13 +16,13 @@ repositories {
 }
 
 semver {
-    // see https://github.com/jmongard/Git.SemVersioning.Gradle
-    patchPattern = "\\A(chore|fix|refactor|deps)(?:\\([^()]+\\))?:"
-    groupVersionIncrements = true
-    noDirtyCheck = true
-    gitDirectory = project.projectDir
-    createReleaseCommit = false
-    createReleaseTag = false
+  // see https://github.com/jmongard/Git.SemVersioning.Gradle
+  patchPattern = "\\A(chore|fix|refactor|deps)(?:\\([^()]+\\))?:"
+  groupVersionIncrements = true
+  noDirtyCheck = true
+  gitDirectory = project.projectDir
+  createReleaseCommit = false
+  createReleaseTag = false
 }
 
 dependencies {
@@ -35,30 +36,45 @@ dependencies {
   implementation 'org.apache.commons:commons-text'
   testImplementation 'io.quarkus:quarkus-junit5'
   testImplementation 'org.wiremock:wiremock:3.5.4'
-  testImplementation("io.quarkus:quarkus-jacoco")
+  testImplementation 'io.quarkus:quarkus-jacoco'
 }
 
 group 'io.github.quotidianennui'
 version semver.version
 
+lombok {
+  disableConfig = true
+}
+
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
 
 test {
   systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+  finalizedBy jacocoTestReport
+  jacoco {
+    // Force it into the same location as quarkus.
+    destinationFile = layout.buildDirectory.file('jacoco-quarkus.exec').get().asFile
+    excludeClassLoaders = ["*QuarkusClassLoader"]
+  }
 }
+
+jacocoTestReport {
+  reports {
+    xml.required = true
+    html.required = true
+    // Force it into the same location as quarkus.
+    html.outputLocation = layout.buildDirectory.dir('jacoco-report')
+  }
+}
+
 compileJava {
-    options.encoding = 'UTF-8'
-    options.compilerArgs << '-parameters'
+  options.encoding = 'UTF-8'
+  options.compilerArgs << '-parameters'
 }
 
 compileTestJava {
-    options.encoding = 'UTF-8'
+  options.encoding = 'UTF-8'
 }
-
-lombok.disableConfig = true
-quarkusRun.dependsOn build
-
-
