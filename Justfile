@@ -76,9 +76,29 @@ release push="localonly":
   rm -rf node_modules build bin
   -docker images | grep -e "^<none>" -e "{{ DOCKER_CONTAINER }}" | awk '{print $3}' | xargs -r docker rmi
 
-# ./gradlew build
-@build:
-  ./gradlew build
+# Do a build perhaps in the style of jar|uber|native
+build style="jar":
+  #!/usr/bin/env bash
+  set -eo pipefail
+
+  case "{{ style }}" in
+    jar)
+      ./gradlew build
+      ;;
+    uber)
+      ./gradlew build -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
+      ;;
+    native)
+      ./gradlew build -Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker
+      ;;
+    *)
+      echo "Unknown build style: {{ style }}"
+      echo "Try: jar | uber | native"
+      ;;
+  esac
+
+@test:
+  ./gradlew check
 
 # ./gradlew quarkusDev
 @dev: check_tesla_env
