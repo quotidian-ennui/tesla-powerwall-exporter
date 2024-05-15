@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
@@ -33,10 +34,8 @@ public class PowerwallStats {
   void collect() {
     try {
       Map<String, Object> aggregate = tesla.get("meters/aggregates", lastFailed.get());
-      powerwallStats.putAll(extract(Metrics.site, aggregate));
-      powerwallStats.putAll(extract(Metrics.load, aggregate));
-      powerwallStats.putAll(extract(Metrics.battery, aggregate));
-      powerwallStats.putAll(extract(Metrics.solar, aggregate));
+      Stream.of(Metrics.site, Metrics.load, Metrics.battery,
+        Metrics.solar).map(metrics -> extract(metrics, aggregate)).forEach(powerwallStats::putAll);
       powerwallStats.putAll(
         extract(Metrics.percentage, tesla.get("system_status/soe", lastFailed.get())));
       powerwallStats.putAll(extract(Metrics.system, tesla.get("system_status", lastFailed.get())));
