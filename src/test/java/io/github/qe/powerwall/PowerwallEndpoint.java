@@ -152,10 +152,7 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
 
     @Override
     protected void configureWiremock() {
-      wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic")).willReturn(okJson("{}")));
-      wiremockServer.givenThat(get(urlEqualTo("/api/meters/aggregates")).willReturn(okJson("{}")));
-      wiremockServer.givenThat(get(urlEqualTo("/api/system_status")).willReturn(okJson("{}")));
-      wiremockServer.givenThat(get(urlEqualTo("/api/system_status/soe")).willReturn(okJson("{}")));
+      wiremockServer.givenThat(any(urlMatching("/api/.*")).willReturn(okJson("{}")));
     }
   }
 }
