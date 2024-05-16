@@ -71,8 +71,11 @@ public class RestClient {
                 })
             .await()
             .atMost(MAX_WAIT);
-    logging(forcedLogging, "Login Successful");
     loggedIn = token != null;
+    logging(
+        forcedLogging,
+        "Login {}",
+        loggedIn ? "[got a token, so success]" : "[did not find a token]");
     return loggedIn;
   }
 

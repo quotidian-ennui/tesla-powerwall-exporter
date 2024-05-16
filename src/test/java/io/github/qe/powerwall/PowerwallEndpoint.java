@@ -3,6 +3,7 @@ package io.github.qe.powerwall;
 import static com.github.tomakehurst.wiremock.client.WireMock.any;
 import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.jsonResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -162,7 +163,11 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
 
     @Override
     protected void configureWiremock() {
-      wiremockServer.givenThat(any(urlMatching("/api/.*")).willReturn(okJson("{}")));
+      wiremockServer.givenThat(any(urlMatching("/api/.*")).atPriority(5).willReturn(okJson("{}")));
+      wiremockServer.givenThat(
+          get(urlEqualTo("/api/system_status/soe"))
+              .atPriority(1)
+              .willReturn(jsonResponse("{}", 401)));
     }
   }
 }

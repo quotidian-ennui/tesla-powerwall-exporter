@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
@@ -25,7 +27,10 @@ public class PowerwallStats {
   private static final Marker TRANSIENT = MarkerFactory.getMarker("TRANSIENT_FAILURE");
 
   @Inject private RestClient tesla;
+
+  @Getter(AccessLevel.PACKAGE)
   private final MeterRegistry registry;
+
   private final AtomicBoolean lastFailed = new AtomicBoolean(false);
   private final Map<String, Object> powerwallStats = new HashMap<>();
 

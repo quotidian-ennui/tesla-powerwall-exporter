@@ -1,9 +1,11 @@
 package io.github.qe.powerwall;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.qe.powerwall.BasicGauge.Metrics;
 import io.github.qe.powerwall.Profiles.Standard;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
@@ -74,5 +76,17 @@ public class StandardTest {
   @Test
   void testAppLogin() {
     stats.login();
+  }
+
+  @Test
+  void testMicrometer() {
+    MeterRegistry registry = stats.getRegistry();
+    for (Metrics metric : Metrics.values()) {
+      for (String key : metric.keyMap().keySet()) {
+        assertNotNull(registry.find(key));
+        assertNotNull(registry.find(key).gauge());
+        assertTrue(registry.find(key).gauge().value() >= 0);
+      }
+    }
   }
 }
