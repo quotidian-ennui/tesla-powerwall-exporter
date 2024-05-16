@@ -1,10 +1,12 @@
 plugins {
   id 'java'
   id 'io.quarkus'
+  id 'jacoco'
   id 'io.freefair.lombok' version '8.6'
   id 'com.github.jmongard.git-semver-plugin' version '0.12.6'
-  id 'jacoco'
   id 'org.barfuin.gradle.jacocolog' version '3.1.0'
+  id "com.diffplug.spotless" version "6.25.0"
+
 }
 
 ext {
@@ -77,4 +79,25 @@ compileJava {
 
 compileTestJava {
   options.encoding = 'UTF-8'
+}
+
+spotless {
+  java {
+    // Only spotlessCheck files that have changed in this branch, based on a diff
+    // from origin/main...
+    // Eventually becomes consistent.
+    ratchetFrom "origin/main"
+    // Allow // spotless:off // spotless:on
+    toggleOffOn()
+    // this conflicts with the standard behaviour of vscode-plugin + intellij
+    // so use gjf in default mode only which is a pure alphabetical import order.
+    // googleJavaFormat().reorderImports(false)
+    googleJavaFormat()
+    removeUnusedImports()
+    // Only useful if you turn off reorderImports() above.
+    // importOrder('\\#', 'java|javax|jakarta', '', 'lombok')
+
+    // fix formatting of type annotations
+    // formatAnnotations()
+  }
 }

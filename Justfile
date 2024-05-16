@@ -6,7 +6,6 @@ DOCKERFILE_CGR:= justfile_directory() / "src/main/docker/Dockerfile.cgr"
 
 DOCKER_IMAGE_TAG := `whoami` / DOCKER_CONTAINER + ":latest"
 OS_NAME:=`uname -o | tr '[:upper:]' '[:lower:]'`
-alias check:=test
 
 # show recipes
 [private]
@@ -98,9 +97,17 @@ build style="jar":
       ;;
   esac
 
-# ./gradlew check
+# ./gradlew spotlessApply
+@fmt:
+  ./gradlew spotlessApply
+
+# ./gradlew check (with spotlessApply)
+@check:
+ ./gradlew spotlessApply check
+
+# ./gradlew test
 @test:
-  ./gradlew check
+  ./gradlew test
 
 # ./gradlew quarkusDev
 @dev: check_tesla_env

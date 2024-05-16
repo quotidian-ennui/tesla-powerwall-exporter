@@ -1,11 +1,13 @@
 package io.github.qe.powerwall;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.any;
 import static com.github.tomakehurst.wiremock.client.WireMock.forbidden;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -19,13 +21,15 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
     """;
 
   // https://github.com/vloschiavo/powerwall2/blob/master/samples/21.44-foogod/running/system_status.soe.json
-  private static final String SYSTEM_SOE_JSON = """
+  private static final String SYSTEM_SOE_JSON =
+      """
     { "percentage": 42.415190953701725 }
     """;
 
   // cut down from
   // https://github.com/vloschiavo/powerwall2/blob/master/samples/21.44-foogod/running/meters.aggregates.json
-  private static final String METERS_JSON = """
+  private static final String METERS_JSON =
+      """
     {
       "site": {
         "instant_power": 72,
@@ -76,7 +80,8 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
 
   // cut down from
   // https://github.com/vloschiavo/powerwall2/blob/master/samples/21.44-foogod/running/system_status.json
-  private static final String SYSTEM_JSON = """
+  private static final String SYSTEM_JSON =
+      """
     {
       "command_source": "Configuration",
       "nominal_full_pack_energy": 14061,
@@ -97,15 +102,19 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
 
   @Override
   public Map<String, String> start() {
-    WireMockConfiguration cfg = WireMockConfiguration.wireMockConfig().templatingEnabled(true)
-      .dynamicHttpsPort().dynamicPort();
+    WireMockConfiguration cfg =
+        WireMockConfiguration.wireMockConfig()
+            .templatingEnabled(true)
+            .dynamicHttpsPort()
+            .dynamicPort();
     wiremockServer = new WireMockServer(cfg);
     wiremockServer.start();
     configureWiremock();
-    return Map.ofEntries(Map.entry("powerwall.gateway.server", wiremockServer.baseUrl()),
-      Map.entry("powerwall.gateway.login", "example@example.com"),
-      Map.entry("powerwall.gateway.pw", "password"),
-      Map.entry("quarkus.scheduler.enabled", "false"));
+    return Map.ofEntries(
+        Map.entry("powerwall.gateway.server", wiremockServer.baseUrl()),
+        Map.entry("powerwall.gateway.login", "example@example.com"),
+        Map.entry("powerwall.gateway.pw", "password"),
+        Map.entry("quarkus.scheduler.enabled", "false"));
   }
 
   protected abstract void configureWiremock();
@@ -116,11 +125,11 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
     protected void configureWiremock() {
       wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic")).willReturn(okJson(TOKEN)));
       wiremockServer.givenThat(
-        get(urlEqualTo("/api/meters/aggregates")).willReturn(okJson(METERS_JSON)));
+          get(urlEqualTo("/api/meters/aggregates")).willReturn(okJson(METERS_JSON)));
       wiremockServer.givenThat(
-        get(urlEqualTo("/api/system_status")).willReturn(okJson(SYSTEM_JSON)));
+          get(urlEqualTo("/api/system_status")).willReturn(okJson(SYSTEM_JSON)));
       wiremockServer.givenThat(
-        get(urlEqualTo("/api/system_status/soe")).willReturn(okJson(SYSTEM_SOE_JSON)));
+          get(urlEqualTo("/api/system_status/soe")).willReturn(okJson(SYSTEM_SOE_JSON)));
     }
   }
 
@@ -131,9 +140,9 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
     protected void configureWiremock() {
       wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic")).willReturn(okJson(TOKEN)));
       wiremockServer.givenThat(
-        get(urlEqualTo("/api/meters/aggregates")).willReturn(okJson(METERS_JSON)));
+          get(urlEqualTo("/api/meters/aggregates")).willReturn(okJson(METERS_JSON)));
       wiremockServer.givenThat(
-        get(urlEqualTo("/api/system_status")).willReturn(okJson(SYSTEM_JSON)));
+          get(urlEqualTo("/api/system_status")).willReturn(okJson(SYSTEM_JSON)));
       wiremockServer.givenThat(get(urlEqualTo("/api/system_status/soe")).willReturn(notFound()));
     }
   }
@@ -147,7 +156,8 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
     }
   }
 
-  // No token means we aren't logged in since there's no token.
+  // Empty JSON for everything, which actually illuminates a execution chain that
+  // makes no difference in the long run but isn't 'correct'
   public static class NoToken extends PowerwallEndpoint {
 
     @Override

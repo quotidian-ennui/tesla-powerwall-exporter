@@ -23,8 +23,7 @@ public class PowerwallStats {
 
   private static final Marker TRANSIENT = MarkerFactory.getMarker("TRANSIENT_FAILURE");
 
-  @Inject
-  private RestClient tesla;
+  @Inject private RestClient tesla;
   private final MeterRegistry registry;
   private final AtomicBoolean lastFailed = new AtomicBoolean(false);
   private final Map<String, Object> powerwallStats = new HashMap<>();
@@ -38,15 +37,16 @@ public class PowerwallStats {
   void collect() {
     try {
       Map<String, Object> aggregate = tesla.get("meters/aggregates", lastFailed.get());
-      Stream.of(Metrics.site, Metrics.load, Metrics.battery,
-        Metrics.solar).map(metrics -> extract(metrics, aggregate)).forEach(powerwallStats::putAll);
+      Stream.of(Metrics.site, Metrics.load, Metrics.battery, Metrics.solar)
+          .map(metrics -> extract(metrics, aggregate))
+          .forEach(powerwallStats::putAll);
       powerwallStats.putAll(
-        extract(Metrics.percentage, tesla.get("system_status/soe", lastFailed.get())));
+          extract(Metrics.percentage, tesla.get("system_status/soe", lastFailed.get())));
       powerwallStats.putAll(extract(Metrics.system, tesla.get("system_status", lastFailed.get())));
       lastFailed.set(false);
     } catch (Exception e) {
       lastFailed.set(true);
-      log.info(TRANSIENT, "Failed to scrape powerwall", e);
+      log.info(TRANSIENT, "Failed to scrape powerwall (recoverable)", e);
     }
   }
 
@@ -58,7 +58,7 @@ public class PowerwallStats {
       lastFailed.set(false);
     } catch (Exception e) {
       lastFailed.set(true);
-      log.info(TRANSIENT, "Scheduled Login failed", e);
+      log.info(TRANSIENT, "Scheduled Login failed (recoverable)", e);
     }
   }
 
@@ -66,10 +66,12 @@ public class PowerwallStats {
   private void initMicrometer() {
     for (Metrics metric : Metrics.values()) {
       for (String key : metric.keyMap().keySet()) {
-        Gauge.builder(key, powerwallStats,
-            stats -> Double.parseDouble(stats.getOrDefault(key, 0).toString()))
-          .description(capitalizeFully(key.replace("_", " ")))
-          .register(registry);
+        Gauge.builder(
+                key,
+                powerwallStats,
+                stats -> Double.parseDouble(stats.getOrDefault(key, 0).toString()))
+            .description(capitalizeFully(key.replace("_", " ")))
+            .register(registry);
       }
     }
   }

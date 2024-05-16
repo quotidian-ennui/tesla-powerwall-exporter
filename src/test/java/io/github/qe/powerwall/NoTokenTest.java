@@ -13,10 +13,8 @@ import org.junit.jupiter.api.Test;
 @TestProfile(NoToken.class)
 public class NoTokenTest {
 
-  @Inject
-  RestClient client;
-  @Inject
-  PowerwallStats stats;
+  @Inject RestClient client;
+  @Inject PowerwallStats stats;
 
   @Test
   void testAppCollect() {

@@ -16,10 +16,8 @@ import org.junit.jupiter.api.Test;
 @TestProfile(Standard.class)
 public class StandardTest {
 
-  @Inject
-  RestClient client;
-  @Inject
-  PowerwallStats stats;
+  @Inject RestClient client;
+  @Inject PowerwallStats stats;
 
   @Test
   void testLogin() {
@@ -28,52 +26,44 @@ public class StandardTest {
 
   @Test
   void testSolarMetric() {
-    Map<String, Object> result = BasicGauge.extract(Metrics.solar, client.get("meters/aggregates", false));
-    Metrics.solar.keyMap().keySet().forEach(
-      k -> assertTrue(result.containsKey(k))
-    );
+    Map<String, Object> result =
+        BasicGauge.extract(Metrics.solar, client.get("meters/aggregates", false));
+    Metrics.solar.keyMap().keySet().forEach(k -> assertTrue(result.containsKey(k)));
   }
 
   @Test
   void testSiteMetric() {
-    Map<String, Object> result = BasicGauge.extract(Metrics.site, client.get("meters/aggregates", false));
-    Metrics.site.keyMap().keySet().forEach(
-      k -> assertTrue(result.containsKey(k))
-    );
+    Map<String, Object> result =
+        BasicGauge.extract(Metrics.site, client.get("meters/aggregates", false));
+    Metrics.site.keyMap().keySet().forEach(k -> assertTrue(result.containsKey(k)));
   }
 
   @Test
   void testLoadMetric() {
-    Map<String, Object> result = BasicGauge.extract(Metrics.load, client.get("meters/aggregates", false));
-    Metrics.load.keyMap().keySet().forEach(
-      k -> assertTrue(result.containsKey(k))
-    );
+    Map<String, Object> result =
+        BasicGauge.extract(Metrics.load, client.get("meters/aggregates", false));
+    Metrics.load.keyMap().keySet().forEach(k -> assertTrue(result.containsKey(k)));
   }
 
   @Test
   void testBatteryMetric() {
-    Map<String, Object> result = BasicGauge.extract(Metrics.battery, client.get("meters/aggregates", false));
-    Metrics.battery.keyMap().keySet().forEach(
-      k -> assertTrue(result.containsKey(k))
-    );
+    Map<String, Object> result =
+        BasicGauge.extract(Metrics.battery, client.get("meters/aggregates", false));
+    Metrics.battery.keyMap().keySet().forEach(k -> assertTrue(result.containsKey(k)));
   }
-
 
   @Test
   void testSystemStatusMetric() {
-    Map<String, Object> result = BasicGauge.extract(Metrics.system, client.get("system_status", false));
-    Metrics.system.keyMap().keySet().forEach(
-      k -> assertTrue(result.containsKey(k))
-    );
+    Map<String, Object> result =
+        BasicGauge.extract(Metrics.system, client.get("system_status", false));
+    Metrics.system.keyMap().keySet().forEach(k -> assertTrue(result.containsKey(k)));
   }
-
 
   @Test
   void testPercentageMetric() {
-    Map<String, Object> result = BasicGauge.extract(Metrics.percentage, client.get("system_status/soe", false));
-    Metrics.percentage.keyMap().keySet().forEach(
-      k -> assertTrue(result.containsKey(k))
-    );
+    Map<String, Object> result =
+        BasicGauge.extract(Metrics.percentage, client.get("system_status/soe", false));
+    Metrics.percentage.keyMap().keySet().forEach(k -> assertTrue(result.containsKey(k)));
   }
 
   @Test
@@ -85,5 +75,4 @@ public class StandardTest {
   void testAppLogin() {
     stats.login();
   }
-
 }

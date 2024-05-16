@@ -13,10 +13,8 @@ import org.junit.jupiter.api.Test;
 @TestProfile(Forbidden.class)
 public class ForbiddenTest {
 
-  @Inject
-  RestClient client;
-  @Inject
-  PowerwallStats stats;
+  @Inject RestClient client;
+  @Inject PowerwallStats stats;
 
   @Test
   void testAppCollect() {
@@ -31,10 +29,9 @@ public class ForbiddenTest {
   @Test
   void testClient() {
     assertAll(
-        () -> assertThrows(IllegalStateException.class,
-            () -> client.login(true)),
-        () -> assertThrows(IllegalStateException.class,
-            () -> client.get("system_status/soe", false))
-    );
+        () -> assertThrows(IllegalStateException.class, () -> client.login(true)),
+        () ->
+            assertThrows(
+                IllegalStateException.class, () -> client.get("system_status/soe", false)));
   }
 }
