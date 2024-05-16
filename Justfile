@@ -97,8 +97,17 @@ build style="jar":
       ;;
   esac
 
+# ./gradlew spotlessApply
+@fmt:
+  ./gradlew spotlessApply
+
+# ./gradlew check (with spotlessApply)
+@check:
+ ./gradlew spotlessApply check
+
+# ./gradlew test
 @test:
-  ./gradlew check
+  ./gradlew test
 
 # ./gradlew quarkusDev
 @dev: check_tesla_env

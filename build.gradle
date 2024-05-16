@@ -1,9 +1,12 @@
 plugins {
-    id 'java'
-    id 'io.quarkus'
-    id 'jacoco'
-    id 'io.freefair.lombok' version '8.6'
-    id 'com.github.jmongard.git-semver-plugin' version '0.12.6'
+  id 'java'
+  id 'io.quarkus'
+  id 'jacoco'
+  id 'io.freefair.lombok' version '8.6'
+  id 'com.github.jmongard.git-semver-plugin' version '0.12.6'
+  id 'org.barfuin.gradle.jacocolog' version '3.1.0'
+  id "com.diffplug.spotless" version "6.25.0"
+
 }
 
 ext {
@@ -15,48 +18,87 @@ repositories {
 }
 
 semver {
-    // see https://github.com/jmongard/Git.SemVersioning.Gradle
-    patchPattern = "\\A(chore|fix|refactor|deps)(?:\\([^()]+\\))?:"
-    groupVersionIncrements = true
-    noDirtyCheck = true
-    gitDirectory = project.projectDir
-    createReleaseCommit = false
-    createReleaseTag = false
+  // see https://github.com/jmongard/Git.SemVersioning.Gradle
+  patchPattern = "\\A(chore|fix|refactor|deps)(?:\\([^()]+\\))?:"
+  groupVersionIncrements = true
+  noDirtyCheck = true
+  gitDirectory = project.projectDir
+  createReleaseCommit = false
+  createReleaseTag = false
 }
 
 dependencies {
-    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
-    implementation 'io.quarkus:quarkus-scheduler'
-    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
-    implementation 'io.quarkus:quarkus-arc'
-    implementation 'io.quarkus:quarkus-qute'
-    implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
-    implementation 'org.slf4j:slf4j-api'
-    implementation 'org.apache.commons:commons-text'
-    testImplementation 'io.quarkus:quarkus-junit5'
+  implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+  implementation 'io.quarkus:quarkus-scheduler'
+  implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+  implementation 'io.quarkus:quarkus-arc'
+  implementation 'io.quarkus:quarkus-qute'
+  implementation 'io.smallrye.reactive:smallrye-mutiny-vertx-web-client'
+  implementation 'org.slf4j:slf4j-api'
+  implementation 'org.apache.commons:commons-text'
+  implementation 'org.apache.commons:commons-lang3'
+  testImplementation 'io.quarkus:quarkus-junit5'
+  testImplementation 'org.wiremock:wiremock:3.5.4'
+  testImplementation 'io.quarkus:quarkus-jacoco'
 }
 
 group 'io.github.quotidianennui'
 version semver.version
 
+lombok {
+  disableConfig = true
+}
+
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
 
 test {
-    systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+  systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+  // quarkus.jacoco.report=false in app.properties
+  // since we want jacocolog to emit its data
+  finalizedBy jacocoTestReport
+  jacoco {
+    // Force it into the same location as quarkus.
+    destinationFile = layout.buildDirectory.file('jacoco-quarkus.exec').get().asFile
+    excludeClassLoaders = ["*QuarkusClassLoader"]
+  }
 }
+
+jacocoTestReport {
+  reports {
+    xml.required = true
+    html.required = true
+  }
+}
+
 compileJava {
-    options.encoding = 'UTF-8'
-    options.compilerArgs << '-parameters'
+  options.encoding = 'UTF-8'
+  options.compilerArgs << '-parameters'
 }
 
 compileTestJava {
-    options.encoding = 'UTF-8'
+  options.encoding = 'UTF-8'
 }
 
-lombok.disableConfig = true
-quarkusRun.dependsOn build
+spotless {
+  java {
+    // Only spotlessCheck files that have changed in this branch, based on a diff
+    // from origin/main...
+    // Eventually becomes consistent.
+    ratchetFrom "origin/main"
+    // Allow // spotless:off // spotless:on
+    toggleOffOn()
+    // this conflicts with the standard behaviour of vscode-plugin + intellij
+    // so use gjf in default mode only which is a pure alphabetical import order.
+    // googleJavaFormat().reorderImports(false)
+    googleJavaFormat()
+    removeUnusedImports()
+    // Only useful if you turn off reorderImports() above.
+    // importOrder('\\#', 'java|javax|jakarta', '', 'lombok')
 
-
+    // fix formatting of type annotations
+    // formatAnnotations()
+  }
+}
