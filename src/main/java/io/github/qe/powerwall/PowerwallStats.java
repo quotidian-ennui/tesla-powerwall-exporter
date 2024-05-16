@@ -1,6 +1,7 @@
 package io.github.qe.powerwall;
 
 import static io.github.qe.powerwall.BasicGauge.extract;
+import static org.apache.commons.lang3.math.NumberUtils.toDouble;
 import static org.apache.commons.text.WordUtils.capitalizeFully;
 
 import io.github.qe.powerwall.BasicGauge.Metrics;
@@ -62,14 +63,14 @@ public class PowerwallStats {
     }
   }
 
-  @SuppressWarnings({"codeql[java/uncaught-number-format-exception]"})
+  // Introduced commons-lang3 as a formal dependency to get rid of this
+  // CodeQL; it's like left pad
+  // @SuppressWarnings({"codeql[java/uncaught-number-format-exception]"})
   private void initMicrometer() {
     for (Metrics metric : Metrics.values()) {
       for (String key : metric.keyMap().keySet()) {
         Gauge.builder(
-                key,
-                powerwallStats,
-                stats -> Double.parseDouble(stats.getOrDefault(key, 0).toString()))
+                key, powerwallStats, stats -> toDouble(stats.getOrDefault(key, 0).toString(), 0))
             .description(capitalizeFully(key.replace("_", " ")))
             .register(registry);
       }
