@@ -1,8 +1,6 @@
 package io.github.qe.powerwall;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.quarkus.qute.Qute;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
@@ -13,11 +11,7 @@ import jakarta.inject.Inject;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -38,6 +32,16 @@ public class RestClient {
   @Getter
   private String gatewayAddress;
 
+  private static final String LOGIN_JSON =
+      """
+  {
+      "clientInfo": {
+        "timezone" : "UTC"
+      },
+      "email": "{email}",
+      "password": "{password}",
+      "username": "customer"
+    }""";
   private static final ResponsePredicate JSON_OR_TEXT =
       ResponsePredicate.contentType(List.of("application/json", "text/plain"));
 
@@ -57,8 +61,10 @@ public class RestClient {
 
   public boolean login(boolean forcedLogging) {
     logging(forcedLogging, "Login to {}", gatewayAddress);
-    LoginObject login = LoginObject.builder().email(email).password(password).build();
-    JsonObject jsonPayload = JsonObject.mapFrom(login);
+    // LoginObject login = LoginObject.builder().email(email).password(password).build();
+    JsonObject jsonPayload =
+        new JsonObject(
+            Qute.fmt(LOGIN_JSON).data("email", email).data("password", password).render());
     token =
         client
             .postAbs(uri("login/Basic"))
@@ -109,28 +115,5 @@ public class RestClient {
     } else {
       log.debug(msg, args);
     }
-  }
-
-  /*
-  {
-    "clientInfo": {
-      "timezone" : "UTC"
-    },
-    "email": "{email}",
-    "password": "{password}",
-    "username": "customer"
-  }
-   */
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Builder(builderClassName = "Builder")
-  @Getter
-  @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private static class LoginObject {
-    @Setter private String email;
-    @Setter private String password;
-    private final String username = "customer";
-    private final Map<String, String> clientInfo = Map.of("timezone", "UTC");
   }
 }
