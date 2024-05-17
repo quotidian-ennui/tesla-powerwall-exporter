@@ -115,7 +115,7 @@ build style="jar":
 
 # ./gradlew quarkusRun
 @run: check_tesla_env
-  ./gradlew -Dorg.gradle.console=plain build quarkusRun
+  ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
 
 [private]
 [no-cd]
