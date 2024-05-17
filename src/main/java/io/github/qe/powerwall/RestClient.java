@@ -5,6 +5,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.WebClient;
+import io.vertx.mutiny.ext.web.client.predicate.ResponsePredicate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.time.Duration;
@@ -89,14 +90,12 @@ public class RestClient {
     Map<String, Object> result =
         client
             .getAbs(uri(api))
+            .expect(ResponsePredicate.SC_SUCCESS)
+            .expect(ResponsePredicate.JSON)
             .putHeader("Authorization", "Bearer " + token)
             .send()
             .onItem()
-            .transform(
-                r -> {
-                  assertStatus(r.statusCode(), false);
-                  return r.bodyAsJsonObject().getMap();
-                })
+            .transform(r -> r.bodyAsJsonObject().getMap())
             .await()
             .atMost(MAX_WAIT);
     logging(forcedLogging, "Scraped {}", api);
