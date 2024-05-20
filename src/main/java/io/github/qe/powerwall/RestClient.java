@@ -1,6 +1,9 @@
 package io.github.qe.powerwall;
 
-import io.quarkus.qute.Qute;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
@@ -11,7 +14,10 @@ import jakarta.inject.Inject;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -20,28 +26,21 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class RestClient {
 
   private final WebClient client;
+
   private static final Duration MAX_WAIT = Duration.ofSeconds(30);
 
   @ConfigProperty(name = "powerwall.gateway.pw")
+  @Getter(AccessLevel.PRIVATE)
   private String password;
 
   @ConfigProperty(name = "powerwall.gateway.login")
+  @Getter(AccessLevel.PRIVATE)
   private String email;
 
   @ConfigProperty(name = "powerwall.gateway.server")
-  @Getter
+  @Getter(AccessLevel.PACKAGE)
   private String gatewayAddress;
 
-  private static final String LOGIN_JSON =
-      """
-  {
-      "clientInfo": {
-        "timezone" : "UTC"
-      },
-      "email": "{email}",
-      "password": "{password}",
-      "username": "customer"
-    }""";
   private static final ResponsePredicate JSON_OR_TEXT =
       ResponsePredicate.contentType(List.of("application/json", "text/plain"));
 
@@ -61,10 +60,7 @@ public class RestClient {
 
   public boolean login(boolean forcedLogging) {
     logging(forcedLogging, "Login to {}", gatewayAddress);
-    // LoginObject login = LoginObject.builder().email(email).password(password).build();
-    JsonObject jsonPayload =
-        new JsonObject(
-            Qute.fmt(LOGIN_JSON).data("email", email).data("password", password).render());
+    JsonObject jsonPayload = JsonObject.mapFrom(new Login());
     token =
         client
             .postAbs(uri("login/Basic"))
@@ -115,5 +111,28 @@ public class RestClient {
     } else {
       log.debug(msg, args);
     }
+  }
+
+  /*
+  {
+     "email": "{email}",
+     "password": "{password}",
+     "username": "customer",
+     "clientInfo": {
+       "timezone": "UTC"
+     }
+   }
+  */
+  @RegisterForReflection
+  @JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
+  @JsonInclude(content = JsonInclude.Include.NON_NULL, value = JsonInclude.Include.NON_EMPTY)
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  private class Login {
+    private String email = RestClient.this.getEmail();
+    private String password = RestClient.this.getPassword();
+    private String username = "customer";
+    private Map<String, String> clientInfo = Map.of("timezone", "UTC");
   }
 }
