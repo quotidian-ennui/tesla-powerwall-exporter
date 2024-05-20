@@ -17,14 +17,14 @@ OS_NAME:=`uname -o | tr '[:upper:]' '[:lower:]'`
   git cliff --unreleased
 
 # Use Docker to build/run
-docker action="build":
+docker action="chainguard":
   #!/usr/bin/env bash
   set -eo pipefail
 
   action="{{ action }}"
   if [[ "$#" -ne "0" ]]; then shift; fi
   case "$action" in
-    build)
+    build|jvm)
       ./gradlew build
       docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
       ;;
@@ -32,7 +32,7 @@ docker action="build":
       ./gradlew build -Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker
       docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_NATIVE }}" .
       ;;
-    chainguard|cgr)
+    chainguard)
       ./gradlew build -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
       docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_CGR }}" .
       ;;
@@ -49,9 +49,51 @@ docker action="build":
       ;;
     *)
       echo "Unknown action: $action"
-      echo "Try: build | run | native | chainguard"
+      echo "Try: jvm | native | chainguard which match the Dockerfile files in src/main/docker/"
+      echo "or run | start to start the container"
+      exit 2
       ;;
   esac
+
+# only native is useful, others here for completeness
+# Publish a snapshot image to ghcr.io
+publish type="native": clean
+  #!/usr/bin/env bash
+  set -eo pipefail
+
+  _giturl_to_base () {
+    local url=$1
+    url=${url%%.git}
+    url=${url#*github.com:}
+    url=${url#*github.com/}
+    echo "$url"
+  }
+
+  type="{{ type }}"
+  gitRemote=$(git remote get-url origin 2>/dev/null | grep "github.com") || true
+  imageName="ghcr.io/$(_giturl_to_base "$gitRemote")"
+  imageTag="$(git rev-parse --short HEAD)-$type"
+  if [[ "$#" -ne "0" ]]; then shift; fi
+  case "$type" in
+    jvm)
+      ./gradlew build
+      docker build --pull -t "$imageName:$imageTag" -f "{{ DOCKERFILE }}" .
+      ;;
+    native)
+      ./gradlew build -Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker
+      docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_NATIVE }}" .
+      ;;
+    chainguard)
+      ./gradlew build -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
+      docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_CGR }}" .
+      ;;
+    *)
+      echo "Unknown type: $type"
+      echo "Try: jvm | native | chainguard which match the Dockerfile files in src/main/docker/"
+      exit 2
+      ;;
+  esac
+  docker push "$imageName:$imageTag"
 
 # Tag & release
 release push="localonly":

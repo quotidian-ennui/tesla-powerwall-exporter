@@ -19,10 +19,11 @@ There's no reason for it; things are pretty much the same but I was interested i
 Since it's quarkus, a lot of heavy lifting has been done already, but you're probably going to have to read the Quarkus docs. It's very vanilla in that respect.
 
 ```bash
-$ ./gradlew -Dorg.gradle.console=plain build
+./gradlew -Dorg.gradle.console=plain build
 ```
 
 Once you have installed the required dependencies, export the following three environment variables (same as the original)
+
 - `TESLA_ADDR` is the IP address of the Tesla Powerwall
 - `TESLA_EMAIL` and `TESLA_PASSWORD` are used for authenticating
 
@@ -49,4 +50,16 @@ __  ____  __  _____   ___  __ ____  ______
 2023-12-11 17:08:48,026 DEBUG [io.git.qe.pow.RestClient] (executor-thread-1) Scraping system_status
 ```
 
+## Quarkus Native
 
+ I've begun building it as a native binary with no special parameters (check the Justfile for how I'm building it); running in my homelab k8s environment it takes (after ~12hrs) about 13Mb of memory. CPU usage isn't significantly different. The native docker image is marked as `-native` in packages (it's by sha rather than just called latest).
+
+```bash
+__  ____  __  _____   ___  __ ____  ______
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/
+2024-05-21 07:03:49,907 INFO  [io.quarkus] (main) tesla-powerwall-exporter 2.3.0-SNAPSHOT native (powered by Quarkus 3.10.0) started in 0.016s. Listening on: http://0.0.0.0:9961
+2024-05-21 07:03:49,907 INFO  [io.quarkus] (main) Profile prod activated.
+2024-05-21 07:03:49,907 INFO  [io.quarkus] (main) Installed features: [cdi, micrometer, scheduler, smallrye-context-propagation, vertx]
+```
