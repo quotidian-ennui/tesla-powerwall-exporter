@@ -98,3 +98,4 @@ jobs:
           automerge_level: "semver-patch"
           merge_commentary: "Merge Gradle Dependencies"
           filter_separator: ","
+          merge_retry_wait_seconds: 120
