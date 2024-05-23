@@ -38,7 +38,7 @@ dependencies {
   implementation 'org.apache.commons:commons-text'
   implementation 'org.apache.commons:commons-lang3'
   testImplementation 'io.quarkus:quarkus-junit5'
-  testImplementation 'org.wiremock:wiremock:3.5.4'
+  testImplementation 'org.wiremock:wiremock:3.6.0'
   testImplementation 'io.quarkus:quarkus-jacoco'
 }
 
