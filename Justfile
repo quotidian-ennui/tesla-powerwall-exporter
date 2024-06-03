@@ -1,7 +1,7 @@
 set positional-arguments := true
 DOCKER_CONTAINER:= "powerwall-export"
 DOCKERFILE:= justfile_directory() / "src/main/docker/Dockerfile.jvm"
-DOCKERFILE_NATIVE:= justfile_directory() / "src/main/docker/Dockerfile.native"
+DOCKERFILE_NATIVE:= justfile_directory() / "src/main/docker/Dockerfile.native-micro"
 DOCKERFILE_CGR:= justfile_directory() / "src/main/docker/Dockerfile.cgr"
 
 DOCKER_IMAGE_TAG := `whoami` / DOCKER_CONTAINER + ":latest"
@@ -116,7 +116,7 @@ release push="localonly":
 # Cleanup
 @clean:
   rm -rf node_modules build bin
-  -docker images | grep -e "^<none>" -e "{{ DOCKER_CONTAINER }}" | awk '{print $3}' | xargs -r docker rmi
+  -docker images | grep -e "<none>" -e "{{ DOCKER_CONTAINER }}" | awk '{print $3}' | xargs -r docker rmi
 
 # Do a build perhaps in the style of jar|uber|native
 build style="jar":
