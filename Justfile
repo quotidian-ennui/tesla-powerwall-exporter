@@ -1,5 +1,6 @@
 set positional-arguments := true
 DOCKER_CONTAINER:= "powerwall-export"
+DOCKER_PUBLIC_IMAGE_LATEST:= "ghcr.io/quotidian-ennui/tesla-powerwall-exporter:latest"
 DOCKERFILE:= justfile_directory() / "src/main/docker/Dockerfile.jvm"
 DOCKERFILE_NATIVE:= justfile_directory() / "src/main/docker/Dockerfile.native-micro"
 DOCKERFILE_CGR:= justfile_directory() / "src/main/docker/Dockerfile.cgr"
@@ -36,9 +37,33 @@ docker action="chainguard":
       ./gradlew build -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
       docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_CGR }}" .
       ;;
+    latest)
+      just check_tesla_env
+      docker pull "{{ DOCKER_PUBLIC_IMAGE_LATEST }}"
+      docker run --rm -it --name "{{ DOCKER_CONTAINER }}" \
+          -p 9961:9961 \
+          -e QUARKUS_HTTP_PORT=9961 \
+          -e TESLA_ADDR="$TESLA_ADDR" \
+          -e TESLA_EMAIL="$TESLA_EMAIL" \
+          -e TESLA_PASSWORD="$TESLA_PASSWORD" \
+          -e LOG_LEVEL=DEBUG \
+          "{{ DOCKER_PUBLIC_IMAGE_LATEST }}"
+      ;;
+    latest-native)
+      just check_tesla_env
+      docker pull "{{ DOCKER_PUBLIC_IMAGE_LATEST }}-native"
+      docker run --rm -it --name "{{ DOCKER_CONTAINER }}" \
+          -p 9961:9961 \
+          -e QUARKUS_HTTP_PORT=9961 \
+          -e TESLA_ADDR="$TESLA_ADDR" \
+          -e TESLA_EMAIL="$TESLA_EMAIL" \
+          -e TESLA_PASSWORD="$TESLA_PASSWORD" \
+          -e LOG_LEVEL=DEBUG \
+          "{{ DOCKER_PUBLIC_IMAGE_LATEST }}-native"
+      ;;
     run|start)
       just check_tesla_env
-      docker run --rm --name "{{ DOCKER_CONTAINER }}" \
+      docker run --rm -it --name "{{ DOCKER_CONTAINER }}" \
           -p 9961:9961 \
           -e QUARKUS_HTTP_PORT=9961 \
           -e TESLA_ADDR="$TESLA_ADDR" \
