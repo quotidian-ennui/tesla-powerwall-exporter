@@ -44,6 +44,7 @@ docker action="chainguard":
           -p 9961:9961 \
           -e QUARKUS_HTTP_PORT=9961 \
           -e TESLA_ADDR="$TESLA_ADDR" \
+          -e TESLA_BACKUP_ADDR="$TESLA_BACKUP_ADDR" \
           -e TESLA_EMAIL="$TESLA_EMAIL" \
           -e TESLA_PASSWORD="$TESLA_PASSWORD" \
           -e LOG_LEVEL=DEBUG \
@@ -56,6 +57,7 @@ docker action="chainguard":
           -p 9961:9961 \
           -e QUARKUS_HTTP_PORT=9961 \
           -e TESLA_ADDR="$TESLA_ADDR" \
+          -e TESLA_BACKUP_ADDR="$TESLA_BACKUP_ADDR" \
           -e TESLA_EMAIL="$TESLA_EMAIL" \
           -e TESLA_PASSWORD="$TESLA_PASSWORD" \
           -e LOG_LEVEL=DEBUG \
@@ -67,6 +69,7 @@ docker action="chainguard":
           -p 9961:9961 \
           -e QUARKUS_HTTP_PORT=9961 \
           -e TESLA_ADDR="$TESLA_ADDR" \
+          -e TESLA_BACKUP_ADDR="$TESLA_BACKUP_ADDR" \
           -e TESLA_EMAIL="$TESLA_EMAIL" \
           -e TESLA_PASSWORD="$TESLA_PASSWORD" \
           -e LOG_LEVEL=DEBUG \

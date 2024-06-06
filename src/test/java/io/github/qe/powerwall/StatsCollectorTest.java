@@ -1,24 +1,20 @@
 package io.github.qe.powerwall;
 
-import io.github.qe.powerwall.Profiles.Forbidden;
+import io.github.qe.powerwall.Profiles.Standard;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
-@TestProfile(Forbidden.class)
-public class ForbiddenTest {
+@TestProfile(Standard.class)
+public class StatsCollectorTest {
 
   @Inject StatsCollector service;
 
   @Test
-  void testLogin() {
-    service.login();
-  }
-
-  @Test
   void testCollect() {
+    service.collect();
     service.collect();
   }
 }
