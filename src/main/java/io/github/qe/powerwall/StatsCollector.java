@@ -18,6 +18,7 @@ import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,7 @@ public class StatsCollector {
 
   private boolean loggedIn = false;
   private final Map<String, Object> pwStats = new HashMap<>();
+  private final AtomicBoolean infoLogging = new AtomicBoolean(true);
 
   public StatsCollector(ObjectMapper m, MeterRegistry registry) {
     this.mapper = m;
@@ -71,10 +73,12 @@ public class StatsCollector {
       pwStats.putAll(buildStats("solar", aggregate.getSolar(), AGGREGATE_STAT_KEYS));
       pwStats.putAll(buildStats("powerwall", pwSvc.getSystemStatus(getToken()), SYSTEM_KEYS));
       pwStats.putAll(buildStats("powerwall", pwSvc.getSystemStatusSOE(getToken()), SOE_KEYS));
-      log.debug("Successfully scraped stats");
+      logging("Successfully scraped stats");
       log.debug("Powerwall stats: {}", pwStats);
+      infoLogging.set(false);
     } catch (Exception e) {
       loggedIn = false;
+      infoLogging.set(true);
       log.info(TRANSIENT, "Failed to scrape powerwall (recoverable)", e);
     }
   }
@@ -85,8 +89,10 @@ public class StatsCollector {
       log.info("Scheduled login refresh");
       tryLogin();
       log.info("Scheduled login successful");
+      infoLogging.set(false);
     } catch (Exception e) {
       loggedIn = false;
+      infoLogging.set(true);
       log.info(TRANSIENT, "Scheduled Login failed (recoverable)", e);
     }
   }
@@ -107,6 +113,14 @@ public class StatsCollector {
     }
     for (String key : BasicGauge.micrometerKeys()) {
       requireNonNull(registry.find(key).gauge()).value();
+    }
+  }
+
+  private void logging(String msg, Object... args) {
+    if (infoLogging.get()) {
+      log.info(msg, args);
+    } else {
+      log.debug(msg, args);
     }
   }
 }
