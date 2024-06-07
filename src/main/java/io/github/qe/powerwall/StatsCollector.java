@@ -1,5 +1,9 @@
 package io.github.qe.powerwall;
 
+import static io.github.qe.powerwall.BasicGauge.AGGREGATE_STAT_KEYS;
+import static io.github.qe.powerwall.BasicGauge.SOE_KEYS;
+import static io.github.qe.powerwall.BasicGauge.SYSTEM_KEYS;
+import static io.github.qe.powerwall.BasicGauge.buildStats;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.math.NumberUtils.toDouble;
 import static org.apache.commons.text.WordUtils.capitalizeFully;
@@ -28,7 +32,7 @@ public class StatsCollector {
 
   private static final Marker TRANSIENT = MarkerFactory.getMarker("TRANSIENT_FAILURE");
 
-  @RestClient private PowerwallService powerwall;
+  @RestClient private PowerwallService pwSvc;
 
   @ConfigProperty(name = "powerwall.gateway.pw")
   @Getter(AccessLevel.PRIVATE)
@@ -46,7 +50,7 @@ public class StatsCollector {
   private final ObjectMapper mapper;
 
   private boolean loggedIn = false;
-  private final Map<String, Object> powerwallStats = new HashMap<>();
+  private final Map<String, Object> pwStats = new HashMap<>();
 
   public StatsCollector(ObjectMapper m, MeterRegistry registry) {
     this.mapper = m;
@@ -60,20 +64,14 @@ public class StatsCollector {
       if (!loggedIn) {
         tryLogin();
       }
-      Aggregate aggregate = powerwall.getAggregates(getToken());
-      powerwallStats.putAll(
-        BasicGauge.buildStats("site", aggregate.getSite(), BasicGauge.AGGREGATE_STAT_KEYS));
-      powerwallStats.putAll(
-        BasicGauge.buildStats("load", aggregate.getLoad(), BasicGauge.AGGREGATE_STAT_KEYS));
-      powerwallStats.putAll(
-        BasicGauge.buildStats("battery", aggregate.getBattery(), BasicGauge.AGGREGATE_STAT_KEYS));
-      powerwallStats.putAll(
-        BasicGauge.buildStats("solar", aggregate.getSolar(), BasicGauge.AGGREGATE_STAT_KEYS));
-      powerwallStats.putAll(
-          BasicGauge.buildStats("powerwall", powerwall.getSystemStatus(getToken()), BasicGauge.SYSTEM_KEYS));
-      powerwallStats.putAll(
-          BasicGauge.buildStats("powerwall", powerwall.getSystemStatusSOE(getToken()), BasicGauge.SOE_KEYS));
-      log.debug("Powerwall stats: {}", powerwallStats);
+      Aggregate aggregate = pwSvc.getAggregates(getToken());
+      pwStats.putAll(buildStats("site", aggregate.getSite(), AGGREGATE_STAT_KEYS));
+      pwStats.putAll(buildStats("load", aggregate.getLoad(), AGGREGATE_STAT_KEYS));
+      pwStats.putAll(buildStats("battery", aggregate.getBattery(), AGGREGATE_STAT_KEYS));
+      pwStats.putAll(buildStats("solar", aggregate.getSolar(), AGGREGATE_STAT_KEYS));
+      pwStats.putAll(buildStats("powerwall", pwSvc.getSystemStatus(getToken()), SYSTEM_KEYS));
+      pwStats.putAll(buildStats("powerwall", pwSvc.getSystemStatusSOE(getToken()), SOE_KEYS));
+      log.debug("Powerwall stats: {}", pwStats);
     } catch (Exception e) {
       loggedIn = false;
       log.info(TRANSIENT, "Failed to scrape powerwall (recoverable)", e);
@@ -93,15 +91,15 @@ public class StatsCollector {
 
   private void tryLogin() throws Exception {
     String response =
-        powerwall.login(Login.builder().email(getEmail()).password(getPassword()).build());
+        pwSvc.login(Login.builder().email(getEmail()).password(getPassword()).build());
     LoginResponse loginResponse = mapper.readValue(response, LoginResponse.class);
-    token = loginResponse.getToken();
-    loggedIn = token != null;
+    token = requireNonNull(loginResponse.getToken());
+    loggedIn = true;
   }
 
   private void initMicrometer() {
     for (String k : BasicGauge.micrometerKeys()) {
-      Gauge.builder(k, powerwallStats, stats -> toDouble(stats.getOrDefault(k, 0).toString(), 0))
+      Gauge.builder(k, pwStats, stats -> toDouble(stats.getOrDefault(k, 0).toString(), 0))
           .description(capitalizeFully(k.replace("_", " ")))
           .register(registry);
     }

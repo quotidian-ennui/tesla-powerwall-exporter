@@ -20,8 +20,17 @@ OS_NAME:=`uname -o | tr '[:upper:]' '[:lower:]'`
 # Use Docker to build/run
 docker action="chainguard":
   #!/usr/bin/env bash
+  # shellcheck disable=SC2068
   set -eo pipefail
 
+  docker_args=()
+  docker_args+=("-p 9961:9961")
+  docker_args+=("-e QUARKUS_HTTP_PORT=9961")
+  docker_args+=("-e TESLA_ADDR=$TESLA_ADDR")
+  docker_args+=("-e TESLA_BACKUP_ADDR=$TESLA_BACKUP_ADDR")
+  docker_args+=("-e TESLA_EMAIL=$TESLA_EMAIL")
+  docker_args+=("-e TESLA_PASSWORD=$TESLA_PASSWORD")
+  docker_args+=("-e LOG_LEVEL=DEBUG")
   action="{{ action }}"
   if [[ "$#" -ne "0" ]]; then shift; fi
   case "$action" in
@@ -41,38 +50,20 @@ docker action="chainguard":
       just check_tesla_env
       docker pull "{{ DOCKER_PUBLIC_IMAGE_LATEST }}"
       docker run --rm -it --name "{{ DOCKER_CONTAINER }}" \
-          -p 9961:9961 \
-          -e QUARKUS_HTTP_PORT=9961 \
-          -e TESLA_ADDR="$TESLA_ADDR" \
-          -e TESLA_BACKUP_ADDR="$TESLA_BACKUP_ADDR" \
-          -e TESLA_EMAIL="$TESLA_EMAIL" \
-          -e TESLA_PASSWORD="$TESLA_PASSWORD" \
-          -e LOG_LEVEL=DEBUG \
+          ${docker_args[@]} \
           "{{ DOCKER_PUBLIC_IMAGE_LATEST }}"
       ;;
     latest-native)
       just check_tesla_env
       docker pull "{{ DOCKER_PUBLIC_IMAGE_LATEST }}-native"
       docker run --rm -it --name "{{ DOCKER_CONTAINER }}" \
-          -p 9961:9961 \
-          -e QUARKUS_HTTP_PORT=9961 \
-          -e TESLA_ADDR="$TESLA_ADDR" \
-          -e TESLA_BACKUP_ADDR="$TESLA_BACKUP_ADDR" \
-          -e TESLA_EMAIL="$TESLA_EMAIL" \
-          -e TESLA_PASSWORD="$TESLA_PASSWORD" \
-          -e LOG_LEVEL=DEBUG \
+          ${docker_args[@]} \
           "{{ DOCKER_PUBLIC_IMAGE_LATEST }}-native"
       ;;
     run|start)
       just check_tesla_env
       docker run --rm -it --name "{{ DOCKER_CONTAINER }}" \
-          -p 9961:9961 \
-          -e QUARKUS_HTTP_PORT=9961 \
-          -e TESLA_ADDR="$TESLA_ADDR" \
-          -e TESLA_BACKUP_ADDR="$TESLA_BACKUP_ADDR" \
-          -e TESLA_EMAIL="$TESLA_EMAIL" \
-          -e TESLA_PASSWORD="$TESLA_PASSWORD" \
-          -e LOG_LEVEL=DEBUG \
+          ${docker_args[@]} \
           "{{ DOCKER_IMAGE_TAG }}"
       ;;
     *)
@@ -147,10 +138,11 @@ release push="localonly":
   -docker images | grep -e "<none>" -e "{{ DOCKER_CONTAINER }}" | awk '{print $3}' | xargs -r docker rmi
 
 # Do a build perhaps in the style of jar|uber|native
-build style="jar":
+build style="uber":
   #!/usr/bin/env bash
   set -eo pipefail
 
+  # shellcheck disable=SC2194
   case "{{ style }}" in
     jar)
       ./gradlew build
