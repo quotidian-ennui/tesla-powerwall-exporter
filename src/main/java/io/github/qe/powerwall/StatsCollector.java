@@ -1,14 +1,12 @@
 package io.github.qe.powerwall;
 
-import static io.github.qe.powerwall.BasicGauge.AGGREGATE_STAT_KEYS;
-import static io.github.qe.powerwall.BasicGauge.SOE_KEYS;
-import static io.github.qe.powerwall.BasicGauge.SYSTEM_KEYS;
 import static io.github.qe.powerwall.BasicGauge.buildStats;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.math.NumberUtils.toDouble;
 import static org.apache.commons.text.WordUtils.capitalizeFully;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.qe.powerwall.BasicGauge.Metrics;
 import io.github.qe.powerwall.model.Aggregate;
 import io.github.qe.powerwall.model.Login;
 import io.github.qe.powerwall.model.LoginResponse;
@@ -67,12 +65,12 @@ public class StatsCollector {
         tryLogin();
       }
       Aggregate aggregate = pwSvc.getAggregates(getToken());
-      pwStats.putAll(buildStats("site", aggregate.getSite(), AGGREGATE_STAT_KEYS));
-      pwStats.putAll(buildStats("load", aggregate.getLoad(), AGGREGATE_STAT_KEYS));
-      pwStats.putAll(buildStats("battery", aggregate.getBattery(), AGGREGATE_STAT_KEYS));
-      pwStats.putAll(buildStats("solar", aggregate.getSolar(), AGGREGATE_STAT_KEYS));
-      pwStats.putAll(buildStats("powerwall", pwSvc.getSystemStatus(getToken()), SYSTEM_KEYS));
-      pwStats.putAll(buildStats("powerwall", pwSvc.getSystemStatusSOE(getToken()), SOE_KEYS));
+      pwStats.putAll(buildStats(Metrics.site, aggregate.getSite()));
+      pwStats.putAll(buildStats(Metrics.load, aggregate.getLoad()));
+      pwStats.putAll(buildStats(Metrics.battery, aggregate.getBattery()));
+      pwStats.putAll(buildStats(Metrics.solar, aggregate.getSolar()));
+      pwStats.putAll(buildStats(Metrics.system, pwSvc.getSystemStatus(getToken())));
+      pwStats.putAll(buildStats(Metrics.percentage, pwSvc.getSystemStatusSOE(getToken())));
       logging("Successfully scraped stats");
       log.debug("Powerwall stats: {}", pwStats);
       infoLogging.set(false);
