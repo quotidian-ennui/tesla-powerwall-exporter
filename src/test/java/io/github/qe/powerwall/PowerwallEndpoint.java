@@ -113,6 +113,10 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
     configureWiremock();
     return Map.ofEntries(
         Map.entry("powerwall.gateway.server", wiremockServer.baseUrl()),
+        Map.entry(
+            "quarkus.stork.powerwall-api.service-discovery.address-list",
+            "localhost:" + wiremockServer.port()),
+        // Map.entry("quarkus.stork.powerwall-api.service-discovery.secure", "true"),
         Map.entry("powerwall.gateway.login", "example@example.com"),
         Map.entry("powerwall.gateway.pw", "password"),
         Map.entry("quarkus.scheduler.enabled", "false"));
@@ -154,6 +158,12 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
     @Override
     protected void configureWiremock() {
       wiremockServer.givenThat(post(urlEqualTo("/api/login/Basic")).willReturn(forbidden()));
+      wiremockServer.givenThat(
+          get(urlEqualTo("/api/system_status/soe")).atPriority(1).willReturn(forbidden()));
+      wiremockServer.givenThat(
+          get(urlEqualTo("/api/meters/aggregates")).atPriority(1).willReturn(forbidden()));
+      wiremockServer.givenThat(
+          get(urlEqualTo("/api/system_status")).atPriority(1).willReturn(forbidden()));
     }
   }
 
@@ -168,6 +178,12 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
           get(urlEqualTo("/api/system_status/soe"))
               .atPriority(1)
               .willReturn(jsonResponse("{}", 401)));
+      wiremockServer.givenThat(
+          get(urlEqualTo("/api/meters/aggregates"))
+              .atPriority(1)
+              .willReturn(jsonResponse("{}", 401)));
+      wiremockServer.givenThat(
+          get(urlEqualTo("/api/system_status")).atPriority(1).willReturn(jsonResponse("{}", 401)));
     }
   }
 }

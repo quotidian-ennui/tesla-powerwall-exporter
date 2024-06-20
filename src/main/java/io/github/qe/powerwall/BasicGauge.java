@@ -1,5 +1,6 @@
 package io.github.qe.powerwall;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -9,26 +10,19 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BasicGauge {
+
   public enum Metrics {
     battery {},
     site {},
     solar {},
     load {},
     percentage {
-      public Map<String, Object> navigateTo(Map<String, Object> stats) {
-        return stats;
-      }
-
       @Override
       public Map<String, String> keyMap() {
         return Collections.singletonMap("tesla_powerwall_state_of_charge_percentage", "percentage");
       }
     },
     system {
-      public Map<String, Object> navigateTo(Map<String, Object> stats) {
-        return stats;
-      }
-
       @Override
       public Map<String, String> keyMap() {
         return Map.ofEntries(
@@ -41,11 +35,6 @@ public class BasicGauge {
       return AGGREGATE_STAT_KEYS.stream()
           .map(s -> Map.entry(String.format("tesla_%s_%s", name(), s), s))
           .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> navigateTo(Map<String, Object> stats) {
-      return (Map<String, Object>) stats.get(name());
     }
   }
 
@@ -61,10 +50,15 @@ public class BasicGauge {
           "instant_average_current",
           "instant_total_current");
 
-  public static Map<String, Object> extract(Metrics metrics, Map<String, Object> stats) {
-    Map<String, Object> item = metrics.navigateTo(stats);
+  public static Map<String, Object> buildStats(Metrics metrics, Map<String, Object> stats) {
     return metrics.keyMap().entrySet().stream()
-        .filter(entry -> item.containsKey(entry.getValue()))
-        .collect(Collectors.toMap(Map.Entry::getKey, entry -> item.get(entry.getValue())));
+        .filter(entry -> stats.containsKey(entry.getValue()))
+        .collect(Collectors.toMap(Map.Entry::getKey, entry -> stats.get(entry.getValue())));
+  }
+
+  public static List<String> micrometerKeys() {
+    return Arrays.stream(Metrics.values())
+        .flatMap(m -> m.keyMap().keySet().stream())
+        .collect(Collectors.toList());
   }
 }

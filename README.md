@@ -10,56 +10,59 @@ There's no reason for it; things are pretty much the same but I was interested i
 
 > Note that due to the nature of the environment I have intermittent WiFi dropouts; this has the tendency to cause the NodeJS app to crash and get restarted by K8S. This isn't a problem in and of itself but the scheduler extension to Quarkus should mean the app doesn't need restarting.
 
-- Java 17 or 21
+- Java 21+
 - Using the bundled Dockerfiles from Quarkus (there is a Dockerfile.cgr for running using the chainguard images)
-- Can compile down to native image (testing in progress)
+- Can compile down to native image
 
 ## Installation and Usage
 
 Since it's quarkus, a lot of heavy lifting has been done already, but you're probably going to have to read the Quarkus docs. It's very vanilla in that respect.
 
 ```bash
-./gradlew -Dorg.gradle.console=plain build
+# casey/just will save you pain here.
+./gradlew -Dorg.gradle.console=plain -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar build
 ```
 
-Once you have installed the required dependencies, export the following three environment variables (same as the original)
+Once you have installed the required dependencies, export the following environment variables (same as the original)
 
 - `TESLA_ADDR` is the IP address of the Tesla Powerwall
+- `TESLA_BACKUP_ADDR` is the backup IP Address of the Tesla Powerwall
+  - Since you can bind the tesla to both WiFi and ethernet; this makes sense right?
+  - If you haven't then just set this to be the same as `TESLA_ADDR` or remove it from `application.properties`
 - `TESLA_EMAIL` and `TESLA_PASSWORD` are used for authenticating
 
 ```bash
 $ export TESLA_ADDR="192.168.0.3"
 $ export TESLA_EMAIL="myemail@myhost.com"
 $ export TESLA_PASSWORD="MySecretPassword"
+$ export TESLA_BACKUP_ADDR="$TESLA_ADDR"
 # Java of course, has a lot of logging. In production mode, DEBUG only impacts "io.github.qe.*" classes.
 $ export LOG_LEVEL=DEBUG
-# default is 9961, as per the original but NODE_PORT -> QUARKUS_HTTP_PORT
-$ export QUARKUS_HTTP_PORT=9963
 $ ./gradlew -Dorg.gradle.console=plain -Dquarkus.package.type=uber-jar build
-$ java -jar build/tesla-powerwall-exporter-2.0.0-SNAPSHOT-runner.jar
+bsh ❯ java -jar build/tesla-powerwall-exporter-3.0.0-SNAPSHOT-runner.jar
+Picked up JAVA_TOOL_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
 __  ____  __  _____   ___  __ ____  ______
  --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
  -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
 --\___\_\____/_/ |_/_/|_/_/|_|\____/___/
-2023-12-11 17:08:46,077 INFO  [io.quarkus] (main) tesla-powerwall-exporter 2.0.0-SNAPSHOT on JVM (powered by Quarkus 3.6.1) started in 0.397s. Listening on: http://0.0.0.0:9963
-2023-12-11 17:08:46,078 INFO  [io.quarkus] (main) Profile prod activated.
-2023-12-11 17:08:46,078 INFO  [io.quarkus] (main) Installed features: [cdi, config-yaml, micrometer, qute, scheduler, smallrye-context-propagation, vertx]
-2023-12-11 17:08:47,041 DEBUG [io.git.qe.pow.RestClient] (executor-thread-1) Login to ...
-2023-12-11 17:08:47,925 DEBUG [io.git.qe.pow.RestClient] (executor-thread-1) Scraping meters/aggregates
-2023-12-11 17:08:48,010 DEBUG [io.git.qe.pow.RestClient] (executor-thread-1) Scraping system_status/soe
-2023-12-11 17:08:48,026 DEBUG [io.git.qe.pow.RestClient] (executor-thread-1) Scraping system_status
+2024-06-07 19:09:31,130 INFO  [io.quarkus] (main) tesla-powerwall-exporter 3.0.0-SNAPSHOT on JVM (powered by Quarkus 3.11.0) started in 0.451s. Listening on: http://0.0.0.0:9961
+2024-06-07 19:09:31,131 INFO  [io.quarkus] (main) Profile prod activated.
+2024-06-07 19:09:31,131 INFO  [io.quarkus] (main) Installed features: [cdi, micrometer, rest-client, rest-client-jackson, scheduler, smallrye-context-propagation, vertx]
+2024-06-07 19:09:33,112 DEBUG [io.git.qe.pow.StatsCollector] (executor-thread-1) Powerwall stats: {tesla_load_instant_apparent_power=642.1633845837055, tesla_battery_instant_apparent_power=410.12193308819764, ...}
 ```
 
 ## Quarkus Native
 
- I've begun building it as a native binary with no special parameters (check the Justfile for how I'm building it); running in my homelab k8s environment it takes (after ~12hrs) about 13Mb of memory. CPU usage isn't significantly different. The native docker image is marked as `-native` in packages (it's by sha rather than just called latest).
+ I've begun building it as a native binary with no special parameters (check the Justfile for how I'm building it); running in my homelab k8s environment it takes (after ~12hrs) about 13Mb of memory. CPU usage isn't significantly different. The native docker image is marked as `-native` in packages.
 
 ```bash
+bsh ❯ build/tesla-powerwall-exporter-3.0.0-SNAPSHOT-runner
 __  ____  __  _____   ___  __ ____  ______
  --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
  -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
 --\___\_\____/_/ |_/_/|_/_/|_|\____/___/
-2024-05-21 07:03:49,907 INFO  [io.quarkus] (main) tesla-powerwall-exporter 2.3.0-SNAPSHOT native (powered by Quarkus 3.10.0) started in 0.016s. Listening on: http://0.0.0.0:9961
-2024-05-21 07:03:49,907 INFO  [io.quarkus] (main) Profile prod activated.
-2024-05-21 07:03:49,907 INFO  [io.quarkus] (main) Installed features: [cdi, micrometer, scheduler, smallrye-context-propagation, vertx]
+2024-06-07 19:12:10,468 INFO  [io.quarkus] (main) tesla-powerwall-exporter 3.0.0-SNAPSHOT native (powered by Quarkus 3.11.0) started in 0.012s. Listening on: http://0.0.0.0:9961
+2024-06-07 19:12:10,469 INFO  [io.quarkus] (main) Profile prod activated.
+2024-06-07 19:12:10,469 INFO  [io.quarkus] (main) Installed features: [cdi, micrometer, rest-client, rest-client-jackson, scheduler, smallrye-context-propagation, vertx]
+2024-06-07 19:12:11,833 DEBUG [io.git.qe.pow.StatsCollector] (executor-thread-1) Powerwall stats: {tesla_load_instant_apparent_power=642.1633845837055, tesla_battery_instant_apparent_power=410.12193308819764, ...}
 ```
