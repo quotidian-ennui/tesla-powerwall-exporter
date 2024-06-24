@@ -1,13 +1,13 @@
 name: docker-latest
+run-name: Build & Publish Docker Image
 
 on:
   push:
-    branches:
-      - master
-      - quarkus
-      - main
     tags:
-      - '*'
+      - "*"
+  repository_dispatch:
+    types:
+      - push-trigger
   workflow_dispatch:
 
 permissions:
@@ -16,5 +16,4 @@ permissions:
 
 jobs:
   build:
-    if: ${{ github.actor != 'dependabot[bot]' }}
     uses: ./.github/workflows/docker-image.yml

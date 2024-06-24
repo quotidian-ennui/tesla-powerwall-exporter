@@ -1,0 +1,25 @@
+name: push-trigger
+run-name: Push Build Trigger
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repo-dispatch:
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: read
+    runs-on: ubuntu-latest
+    name: Dispatch
+    steps:
+      - name: dispatch
+        uses: quotidian-ennui/actions-olio/pr-trigger@main
+        with:
+          event_type: push-trigger
