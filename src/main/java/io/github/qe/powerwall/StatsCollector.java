@@ -12,8 +12,10 @@ import io.github.qe.powerwall.model.Login;
 import io.github.qe.powerwall.model.LoginResponse;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.quarkus.arc.log.LoggerName;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,14 +24,18 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
+import org.jboss.logging.Logger;
 
-@Slf4j
 @ApplicationScoped
+@Slf4j
 public class StatsCollector {
 
-  private static final Marker TRANSIENT = MarkerFactory.getMarker("TRANSIENT_FAILURE");
+  // This is the easy way to get stop log.error() from being
+  // emitted to the console when we run gradle test since we
+  // can turn off this logging in the %test profile.
+  @Inject
+  @LoggerName("powerwall.transient.errors")
+  private Logger elog;
 
   @RestClient private PowerwallService pwSvc;
 
@@ -72,12 +78,12 @@ public class StatsCollector {
       pwStats.putAll(buildStats(Metrics.system, pwSvc.getSystemStatus(getToken())));
       pwStats.putAll(buildStats(Metrics.percentage, pwSvc.getSystemStatusSOE(getToken())));
       logging("Successfully scraped stats");
-      log.debug("Powerwall stats: {}", pwStats);
+      logging("Powerwall stats: {}", pwStats);
       infoLogging.set(false);
     } catch (Exception e) {
       loggedIn = false;
       infoLogging.set(true);
-      log.info(TRANSIENT, "Failed to scrape powerwall (recoverable)", e);
+      elog.error("Failed to scrape powerwall (recoverable)", e);
     }
   }
 
@@ -91,7 +97,7 @@ public class StatsCollector {
     } catch (Exception e) {
       loggedIn = false;
       infoLogging.set(true);
-      log.info(TRANSIENT, "Scheduled Login failed (recoverable)", e);
+      elog.error("Scheduled Login failed (recoverable)", e);
     }
   }
 
