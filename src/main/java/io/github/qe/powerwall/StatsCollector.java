@@ -13,7 +13,11 @@ import io.github.qe.powerwall.model.LoginResponse;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.scheduler.Scheduled;
+import io.quarkus.vertx.http.ManagementInterface;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,6 +33,8 @@ import org.jboss.logging.Logger;
 public class StatsCollector {
 
   private final Logger errorLogger = Logger.getLogger("powerwall.transient.errors");
+  private static final String LOGIN_INFO = """
+  {"loggedin": "%s", "token": "%s"}""";
 
   @Getter(AccessLevel.PACKAGE)
   private final String password;
@@ -123,5 +129,18 @@ public class StatsCollector {
     } else {
       log.debugf(msg, args);
     }
+  }
+
+  @SuppressWarnings("unused")
+  public void registerManagementRoutes(@Observes ManagementInterface mi) {
+    // VertX router, so we can't block
+    mi.router()
+        .get("/loginStatus")
+        .handler(
+            rc ->
+                rc.response()
+                    .setStatusCode(200)
+                    .putHeader("Content-Type", MediaType.APPLICATION_JSON)
+                    .end(String.format(LOGIN_INFO, loggedIn, getToken())));
   }
 }
