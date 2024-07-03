@@ -14,8 +14,11 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.arc.log.LoggerName;
 import io.quarkus.scheduler.Scheduled;
+import io.quarkus.vertx.http.ManagementInterface;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,6 +32,9 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 @Slf4j
 public class StatsCollector {
+
+  private static final String LOGIN_INFO = """
+  {"loggedin": "%s", "token": "%s"}""";
 
   // This is the easy way to get stop log.error() from being
   // emitted to the console when we run gradle test since we
@@ -126,5 +132,18 @@ public class StatsCollector {
     } else {
       log.debug(msg, args);
     }
+  }
+
+  @SuppressWarnings("unused")
+  public void registerManagementRoutes(@Observes ManagementInterface mi) {
+    // VertX router, so we can't block
+    mi.router()
+        .get("/loginStatus")
+        .handler(
+            rc ->
+                rc.response()
+                    .setStatusCode(200)
+                    .putHeader("Content-Type", MediaType.APPLICATION_JSON)
+                    .end(String.format(LOGIN_INFO, loggedIn, getToken())));
   }
 }
