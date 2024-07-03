@@ -161,11 +161,11 @@ build style="uber":
 
 # ./gradlew spotlessApply
 @fmt:
-  ./gradlew spotlessApply
+  ./gradlew -PdisableSpotlessJava=false spotlessApply
 
 # ./gradlew check (with spotlessApply)
 @check:
- ./gradlew spotlessApply check
+ ./gradlew -PdisableSpotlessJava=false spotlessApply check
 
 # ./gradlew test
 @test:
