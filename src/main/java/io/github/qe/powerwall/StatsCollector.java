@@ -35,17 +35,17 @@ public class StatsCollector {
   // can turn off this logging in the %test profile.
   @Inject
   @LoggerName("powerwall.transient.errors")
-  private Logger elog;
+  Logger errorLogger;
 
-  @RestClient private PowerwallService pwSvc;
+  @Inject @RestClient PowerwallService pwSvc;
 
   @ConfigProperty(name = "powerwall.gateway.pw")
-  @Getter(AccessLevel.PRIVATE)
-  private String password;
+  @Getter(AccessLevel.PACKAGE)
+  String password;
 
   @ConfigProperty(name = "powerwall.gateway.login")
-  @Getter(AccessLevel.PRIVATE)
-  private String email;
+  @Getter(AccessLevel.PACKAGE)
+  String email;
 
   @Getter(AccessLevel.PRIVATE)
   private String token;
@@ -83,7 +83,7 @@ public class StatsCollector {
     } catch (Exception e) {
       loggedIn = false;
       infoLogging.set(true);
-      elog.error("Failed to scrape powerwall (recoverable)", e);
+      errorLogger.error("Failed to scrape powerwall (recoverable)", e);
     }
   }
 
@@ -97,7 +97,7 @@ public class StatsCollector {
     } catch (Exception e) {
       loggedIn = false;
       infoLogging.set(true);
-      elog.error("Scheduled Login failed (recoverable)", e);
+      errorLogger.error("Scheduled Login failed (recoverable)", e);
     }
   }
 
