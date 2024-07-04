@@ -14,6 +14,7 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.vertx.http.ManagementInterface;
+import io.vertx.core.Vertx;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -48,6 +49,8 @@ public class StatsCollector {
 
   @Getter(AccessLevel.PRIVATE)
   private String token;
+
+  @Inject Vertx vertx;
 
   private boolean loggedIn = false;
   private final Map<String, Object> pwStats = new HashMap<>();
@@ -135,12 +138,24 @@ public class StatsCollector {
   public void registerManagementRoutes(@Observes ManagementInterface mi) {
     // VertX router, so we can't block
     mi.router()
-        .get("/loginStatus")
+        .get("/info/loginStatus")
         .handler(
             rc ->
                 rc.response()
                     .setStatusCode(200)
                     .putHeader("Content-Type", MediaType.APPLICATION_JSON)
                     .end(String.format(LOGIN_INFO, loggedIn, getToken())));
+    mi.router()
+        .get("/info/networks")
+        .handler(
+            rc ->
+                vertx.executeBlocking(
+                    () -> {
+                      rc.response()
+                          .setStatusCode(200)
+                          .putHeader("Content-Type", MediaType.APPLICATION_JSON)
+                          .end(pwSvc.getNetworkInfo(getToken()));
+                      return null;
+                    }));
   }
 }
