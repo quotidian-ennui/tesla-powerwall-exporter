@@ -42,4 +42,10 @@ public interface PowerwallService {
   @Produces({MediaType.APPLICATION_JSON})
   @ClientHeaderParam(name = "Authorization", value = "Bearer {token}")
   Map<String, Object> getSystemStatusSOE(@NotBody String token);
+
+  @Path("/networks")
+  @GET
+  @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
+  @ClientHeaderParam(name = "Authorization", value = "Bearer {token}")
+  String getNetworkInfo(@NotBody String token);
 }
