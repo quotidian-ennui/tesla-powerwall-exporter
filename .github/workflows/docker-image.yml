@@ -37,6 +37,8 @@ jobs:
           ghcr_image_name: ghcr.io/${{ github.repository }}
           ghcr_user: ${{ github.repository_owner }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          cache_from: type=gha
+          cache_to: type=gha,mode=max
 
   docker-build-native:
     runs-on: ubuntu-latest
@@ -67,3 +69,5 @@ jobs:
           ghcr_image_name: ghcr.io/${{ github.repository }}
           ghcr_user: ${{ github.repository_owner }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          cache_from: type=gha
+          cache_to: type=gha,mode=max
