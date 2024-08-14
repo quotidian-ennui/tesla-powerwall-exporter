@@ -3,6 +3,7 @@ set positional-arguments := true
 LOCAL_DOCKER_CONTAINER:= "powerwall-export"
 DOCKER_PUBLIC_IMAGE_LATEST:= "ghcr.io/quotidian-ennui/tesla-powerwall-exporter:latest"
 DOCKERFILE:= justfile_directory() / "src/main/docker/Dockerfile.jvm"
+DOCKERFILE_UBER:= justfile_directory() / "src/main/docker/Dockerfile.jvm-uber"
 DOCKERFILE_NATIVE:= justfile_directory() / "src/main/docker/Dockerfile.native-micro"
 DOCKERFILE_CGR:= justfile_directory() / "src/main/docker/Dockerfile.cgr"
 DOCKER_IMAGE_TAG := `whoami` / LOCAL_DOCKER_CONTAINER + ":latest"
@@ -43,6 +44,10 @@ docker $action="help": check_tesla_env
     build|jvm)
       ./gradlew build
       docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
+      ;;
+    uber)
+      ./gradlew build {{ GRADLE_UBER_OPTS}}
+      docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_UBER }}" .
       ;;
     native)
       ./gradlew build {{ GRADLE_NATIVE_OPTS }}
