@@ -2,7 +2,7 @@ plugins {
   id 'java'
   id 'io.quarkus'
   id 'jacoco'
-  id 'io.freefair.lombok' version '8.7.1'
+  id 'io.freefair.lombok' version '8.10'
   id 'com.github.jmongard.git-semver-plugin' version '0.12.10'
   id 'org.barfuin.gradle.jacocolog' version '3.1.0'
   id "com.diffplug.spotless" version "6.25.0"
