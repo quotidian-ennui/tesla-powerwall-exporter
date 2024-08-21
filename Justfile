@@ -80,7 +80,7 @@ docker $action="help": check_tesla_env
     *)
       echo "Unknown action: $action"
       echo ""
-      echo "just docker jvm | native | chainguard which match the Dockerfile files in src/main/docker/"
+      echo "just docker jvm | uber | native | chainguard which match the Dockerfile files in src/main/docker/"
       echo "just docker run | start to start a previously built container"
       echo "just docker latest to run the public latest image"
       echo "just docker latest-native to run the public latest native image"
