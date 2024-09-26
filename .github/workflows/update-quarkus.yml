@@ -2,7 +2,7 @@ name: quarkus-update
 on:
   workflow_dispatch: null
   schedule:
-    - cron: '15 03 * * MON'
+    - cron: "15 03 * * MON"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,32 +33,57 @@ jobs:
         uses: actions/setup-java@b36c23c0d998641eff861008f374ee103c25ac73 # v4.4.0
         with:
           java-version: 21
-          distribution: 'temurin'
-      - name: Gradle Build
+          distribution: "temurin"
+      - name: Gradle Setup
         uses: gradle/actions/setup-gradle@d156388eb19639ec20ade50009f3d199ce1e2808 # v4.1.0
         id: gradle
         with:
           gradle-version: wrapper
-      - name: Build
-        id: build
+      - name: Current Quarkus Version
+        id: currentQuarkus
+        run: |
+          quarkusVersion=$(grep '^quarkusPlatformVersion=' gradle.properties | cut -d'=' -f2)
+          echo "release=$quarkusVersion"  >> "$GITHUB_OUTPUT"
+      # see https://gist.github.com/bitmvr/9ed42e1cc2aac799b123de9fdc59b016 to do it all in bash?
+      - name: Current Quarkus SEMVER
+        id: q_semver_current
+        uses: release-kit/semver@97491c46500b6e758ced599794164a234b8aa08c # v2.0.7
+        with:
+          string: "${{ steps.currentQuarkus.outputs.release }}"
+      - name: Run QuarkusUpdate
+        id: quarkusUpdate
         run: |
           ./gradlew quarkusUpdate
-      - name: Quarkus Release
+      - name: Updated Quarkus Version
         id: latestQuarkus
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          latest=$(gh release list --repo quarkusio/quarkus --exclude-drafts --exclude-pre-releases | awk '{print $1}' | sort -rV | head -n 1)
-          echo "release=$latest" >> "$GITHUB_OUTPUT"
+          quarkusVersion=$(grep '^quarkusPlatformVersion=' gradle.properties | cut -d'=' -f2)
+          echo "release=$quarkusVersion"  >> "$GITHUB_OUTPUT"
+      - name: Latest Quarkus SEMVER
+        id: q_semver_latest
+        uses: release-kit/semver@97491c46500b6e758ced599794164a234b8aa08c # v2.0.7
+        with:
+          string: "${{ steps.latestQuarkus.outputs.release }}"
+      - name: Build PR title
+        id: pr_title
+        run: |
+          msg="bump quarkus from ${{ steps.currentQuarkus.outputs.release }} to ${{ steps.latestQuarkus.outputs.release }}"
+          if [[ "${{ steps.q_semver_latest.outputs.major }}" != "${{ steps.q_semver_current.outputs.major }}" ]]; then
+            echo "msg=feat(quarkus)!: $msg" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ steps.q_semver_latest.outputs.minor }}" != "${{ steps.q_semver_current.outputs.minor }}" ]]; then
+            echo "msg=feat(quarkus): $msg" >> "$GITHUB_OUTPUT"
+          else
+            echo "msg=deps(quarkus): $msg" >> "$GITHUB_OUTPUT"
+          fi
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
         with:
           token: ${{ steps.app-token.outputs.token }}
           committer: ${{ env.PR_GITHUB_USER }}
           author: ${{ env.PR_GITHUB_USER }}
-          commit-message: "deps(java): bump quarkus to ${{ steps.latestQuarkus.outputs.release }}"
+          commit-message: "${{ steps.pr_title.outputs.msg }}"
           branch: deps/quarkus-${{ hashFiles('**/gradle.properties') }}
-          title: "deps(java): bump quarkus to ${{ steps.latestQuarkus.outputs.release }}"
+          title: "${{ steps.pr_title.outputs.msg }}"
           labels: dependencies
           reviewers: ${{ github.repository_owner }}
           body: |
