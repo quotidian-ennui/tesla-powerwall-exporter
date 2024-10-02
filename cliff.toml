@@ -28,7 +28,13 @@ body = """
     {% for commit in commits %}
         - {% if commit.breaking %}💥(**BREAKING**) {% endif %}{% if commit.scope %}({{ commit.scope }}) {% endif %}{{ commit.message | upper_first | trim}} by {{commit.author.name}}\
     {% endfor %}
-{% endfor %}\n
+{% endfor %}
+{% if version %}\
+    {% if previous.version %}\
+      **Full Changelog**: https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/compare/{{ previous.version }}...{{ version }}\
+    {% endif %}\
+{% endif -%}\
+{% raw %}\n{% endraw %}
 """
 # remove the leading and trailing whitespace from the template
 trim = true
@@ -70,6 +76,7 @@ commit_parsers = [
     { message = "^fix\\(ci|build\\)", group = "<!-- 07 -->👷 Build Environment"},
     { message = "^fix", group = "<!-- 02 -->🐛 Bug Fixes"},
     { message = "^doc", group = "<!-- 03 -->📝 Documentation"},
+    { message = "^docs", group = "<!-- 03 -->📝 Documentation"},
     { message = "^perf", group = "<!-- 04 -->⚡ Performance"},
     { message = "^refactor\\(tf\\)", group = "<!-- 09 -->🏭 Terraform"},
     { message = "^refactor\\(ci|build\\)", group = "<!-- 07 -->👷 Build Environment"},
