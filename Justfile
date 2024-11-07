@@ -18,7 +18,7 @@ GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.ty
 
 # Show proposed release notes
 @changelog *args='--unreleased':
-    git cliff "$@"
+    GITHUB_TOKEN=$(gh auth token) git cliff --github-repo "quotidian-ennui/tesla-powerwall-exporter" "$@"
 
 # Use Docker to build/run
 docker $action="help": check_tesla_env

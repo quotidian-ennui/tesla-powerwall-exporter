@@ -1,9 +1,9 @@
 # git-cliff ~ configuration file
 # https://git-cliff.org/docs/configuration
 
-[remote.github]
-owner = "quotidian-ennui"
-repo = "tesla-powerwall-exporter"
+# [remote.github]
+# owner = "quotidian-ennui"
+# repo = "tesla-powerwall-exporter"
 
 [changelog]
 # changelog header
