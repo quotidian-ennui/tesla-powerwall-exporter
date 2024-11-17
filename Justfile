@@ -17,10 +17,12 @@ GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.ty
     just --list --list-prefix "  "
 
 # Show proposed release notes
+[group("release")]
 @changelog *args='--unreleased':
     GITHUB_TOKEN=$(gh auth token) git cliff --github-repo "quotidian-ennui/tesla-powerwall-exporter" "$@"
 
 # Use Docker to build/run
+[group("docker")]
 docker $action="help": check_tesla_env
     #!/usr/bin/env bash
     # shellcheck disable=SC2068
@@ -89,6 +91,7 @@ docker $action="help": check_tesla_env
 # only native is useful, others here for completeness
 
 # Publish a snapshot image to ghcr.io
+[group("docker")]
 publish $type="native": clean
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
@@ -132,6 +135,7 @@ publish $type="native": clean
     docker push "$imageName:$imageTag"
 
 # Tag & release
+[group("release")]
 release $push="localonly":
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
@@ -151,11 +155,13 @@ release $push="localonly":
     esac
 
 # Cleanup
+[group("build")]
 @clean:
     rm -rf node_modules build bin
     -docker images | grep -e "<none>" -e "{{ LOCAL_DOCKER_CONTAINER }}" | awk '{print $3}' | xargs -r docker rmi
 
 # Do a build perhaps in the style of jar|uber|native
+[group("build")]
 build $style="uber":
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
@@ -179,23 +185,28 @@ build $style="uber":
     esac
 
 # ./gradlew spotlessApply
+[group("build")]
 @fmt:
     ./gradlew --quiet -PdisableSpotlessJava=false spotlessApply
     just --fmt --unstable
 
 # ./gradlew check (with spotlessApply)
+[group("build")]
 @check:
     ./gradlew -PdisableSpotlessJava=false spotlessApply check
 
 # ./gradlew test
+[group("build")]
 @test:
     ./gradlew test
 
 # ./gradlew quarkusDev
+[group("build")]
 @dev: check_tesla_env
     ./gradlew -Dorg.gradle.console=plain quarkusDev
 
 # ./gradlew quarkusRun
+[group("build")]
 @run: check_tesla_env
     ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
 
