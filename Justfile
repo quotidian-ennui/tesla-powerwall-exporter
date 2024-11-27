@@ -19,11 +19,11 @@ GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.ty
 # Show proposed release notes
 [group("release")]
 @changelog *args='--unreleased':
-    GITHUB_TOKEN=$(gh auth token) git cliff --github-repo "quotidian-ennui/tesla-powerwall-exporter" "$@"
+    GITHUB_TOKEN=$(gh auth token) git cliff --github-repo "quotidian-ennui/tesla-powerwall-exporter" "$@" 2>/dev/null
 
 # Use Docker to build/run
 [group("docker")]
-docker $action="help": check_tesla_env
+docker action="help": check_tesla_env
     #!/usr/bin/env bash
     # shellcheck disable=SC2068
     # shellcheck disable=SC1083
@@ -39,7 +39,7 @@ docker $action="help": check_tesla_env
     docker_args+=("-e TESLA_PASSWORD=$TESLA_PASSWORD")
     docker_args+=("-e LOG_LEVEL=DEBUG")
     if [[ "$#" -ne "0" ]]; then shift; fi
-    case "$action" in
+    case "{{ action }}" in
       build|jvm)
         ./gradlew build
         docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
@@ -77,7 +77,7 @@ docker $action="help": check_tesla_env
             "{{ DOCKER_IMAGE_TAG }}"
         ;;
       *)
-        echo "Unknown action: $action"
+        echo "Unknown action: {{ action }}"
         echo ""
         echo "just docker jvm | uber | native | chainguard which match the Dockerfile files in src/main/docker/"
         echo "just docker run | start to start a previously built container"
@@ -92,7 +92,7 @@ docker $action="help": check_tesla_env
 
 # Publish a snapshot image to ghcr.io
 [group("docker")]
-publish $type="native": clean
+publish type="native": clean
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
     # shellcheck disable=SC2154
@@ -108,9 +108,9 @@ publish $type="native": clean
 
     gitRemote=$(git remote get-url origin 2>/dev/null | grep "github.com") || true
     imageName="ghcr.io/$(_giturl_to_base "$gitRemote")"
-    imageTag="$(git rev-parse --short HEAD)-$type"
+    imageTag="$(git rev-parse --short HEAD)-{{ type }}"
     if [[ "$#" -ne "0" ]]; then shift; fi
-    case "$type" in
+    case "{{ type }}" in
       jvm)
         ./gradlew build
         docker build --pull -t "$imageName:$imageTag" -f "{{ DOCKERFILE }}" .
@@ -124,7 +124,7 @@ publish $type="native": clean
         docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_CGR }}" .
         ;;
       *)
-        echo "Unknown type: $type"
+        echo "Unknown type: {{ type }}"
         echo ""
         echo "Publish a docker image to ghcr.io using the current git ref"
         echo ""
@@ -136,7 +136,7 @@ publish $type="native": clean
 
 # Tag & release
 [group("release")]
-release $push="localonly":
+release push="localonly":
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
     # shellcheck disable=SC2154
@@ -145,7 +145,7 @@ release $push="localonly":
     tag=$(./gradlew --quiet -Dorg.gradle.console=plain releaseVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+$")
     echo "Release: $tag"
     git tag -a "$tag" -m "release: $tag"
-    case "$push" in
+    case "{{ push }}" in
       push|github)
         git push --all
         git push --tags
@@ -162,13 +162,13 @@ release $push="localonly":
 
 # Do a build perhaps in the style of jar|uber|native
 [group("build")]
-build $style="uber":
+build style="uber":
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
     # shellcheck disable=SC2154
     set -eo pipefail
 
-    case "$style" in
+    case "{{ style }}" in
       jar)
         ./gradlew build
         ;;
