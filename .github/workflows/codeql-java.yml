@@ -5,14 +5,15 @@ on:
     branches:
       - main
     paths:
-      - '**.java'
+      - "**.java"
   pull_request:
     branches:
       - main
     paths:
-      - '**.java'
+      - "**.java"
   schedule:
-    - cron: '16 20 * * 0'
+    - cron: "16 20 * * 0"
+  workflow_dispatch: null
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -39,7 +40,7 @@ jobs:
         uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
         with:
           java-version: 21
-          distribution: 'temurin'
+          distribution: "temurin"
       - name: Initialize CodeQL
         uses: github/codeql-action/init@aa578102511db1f4524ed59b8cc2bae4f6e88195 # v3.27.6
         with:
