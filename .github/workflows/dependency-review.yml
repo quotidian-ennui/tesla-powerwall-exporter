@@ -24,3 +24,18 @@ jobs:
           vulnerability-check: true
           license-check: true
           fail-on-severity: moderate
+
+  review-success:
+    needs:
+      - dependency-review
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: read
+    runs-on: ubuntu-latest
+    name: Dispatch
+    steps:
+      - name: dispatch
+        uses: quotidian-ennui/actions-olio/pr-trigger@main
+        with:
+          event_type: dependency-review-success

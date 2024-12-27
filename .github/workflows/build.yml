@@ -1,9 +1,9 @@
 name: build
-run-name: Assess PR (${{ github.event.client_payload.detail.pull_request }})
+run-name: Build PR (${{ github.event.client_payload.detail.pull_request }})
 on:
   repository_dispatch:
     types:
-      - pr-trigger
+      - dependency-review-success
 
 env:
   STATUS_CONTEXT: "Gradle Check"
