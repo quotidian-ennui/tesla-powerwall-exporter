@@ -10,6 +10,7 @@ DOCKER_IMAGE_TAG := `whoami` / LOCAL_DOCKER_CONTAINER + ":latest"
 OS_NAME := `uname -o | tr '[:upper:]' '[:lower:]'`
 GRADLE_NATIVE_OPTS := "-Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker"
 GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar"
+GRADLEW := "./gradlew --no-problems-report"
 
 # show recipes
 [private]
@@ -41,19 +42,19 @@ docker action="help": check_tesla_env
     if [[ "$#" -ne "0" ]]; then shift; fi
     case "$action" in
       build|jvm)
-        ./gradlew build
+        {{ GRADLEW }} build
         docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
         ;;
       uber)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
+        {{ GRADLEW }} build {{ GRADLE_UBER_OPTS }}
         docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_UBER }}" .
         ;;
       native)
-        ./gradlew build {{ GRADLE_NATIVE_OPTS }}
+        {{ GRADLEW }} build {{ GRADLE_NATIVE_OPTS }}
         docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_NATIVE }}" .
         ;;
       chainguard|cgr)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
+        {{ GRADLEW }} build {{ GRADLE_UBER_OPTS }}
         docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_CGR }}" .
         ;;
       latest)
@@ -112,15 +113,15 @@ publish type="native": clean
     if [[ "$#" -ne "0" ]]; then shift; fi
     case "$type" in
       jvm)
-        ./gradlew build
+        {{ GRADLEW }} build
         docker build --pull -t "$imageName:$imageTag" -f "{{ DOCKERFILE }}" .
         ;;
       native)
-        ./gradlew build {{ GRADLE_NATIVE_OPTS }}
+        {{ GRADLEW }} build {{ GRADLE_NATIVE_OPTS }}
         docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_NATIVE }}" .
         ;;
       chainguard)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
+        {{ GRADLEW }} build {{ GRADLE_UBER_OPTS }}
         docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_CGR }}" .
         ;;
       *)
@@ -142,7 +143,7 @@ release push="localonly":
     set -eo pipefail
 
     push="{{ push }}"
-    tag=$(./gradlew --quiet -Dorg.gradle.console=plain releaseVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+$")
+    tag=$({{ GRADLEW }} --quiet -Dorg.gradle.console=plain releaseVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+$")
     echo "Release: $tag"
     git tag -a "$tag" -m "release: $tag"
     case "$push" in
@@ -161,7 +162,7 @@ version:
     # shellcheck disable=SC1083
     set -eo pipefail
 
-    ver=$(./gradlew --quiet -Dorg.gradle.console=plain printVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+.*$")
+    ver=$({{ GRADLEW }} --quiet -Dorg.gradle.console=plain printVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+.*$")
     echo "Version: $ver"
 
 # Cleanup
@@ -180,13 +181,13 @@ build style="uber":
     style="{{ style }}"
     case "$style" in
       jar)
-        ./gradlew build
+        {{ GRADLEW }} build
         ;;
       uber)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
+        {{ GRADLEW }} build {{ GRADLE_UBER_OPTS }}
         ;;
       native)
-        ./gradlew build {{ GRADLE_NATIVE_OPTS }}
+        {{ GRADLEW }} build {{ GRADLE_NATIVE_OPTS }}
         ;;
       *)
         echo "Unknown build style: $style"
@@ -202,28 +203,28 @@ build style="uber":
 # ./gradlew spotlessApply
 [group("build")]
 @fmt:
-    ./gradlew --quiet -PdisableSpotlessJava=false spotlessApply
+    {{ GRADLEW }} --quiet -PdisableSpotlessJava=false spotlessApply
     just --fmt --unstable
 
 # ./gradlew check (with spotlessApply)
 [group("build")]
 @check:
-    ./gradlew -PdisableSpotlessJava=false spotlessApply check
+    {{ GRADLEW }} -PdisableSpotlessJava=false spotlessApply check
 
 # ./gradlew test
 [group("build")]
 @test:
-    ./gradlew test
+    {{ GRADLEW }} test
 
 # ./gradlew quarkusDev
 [group("build")]
 @dev: check_tesla_env
-    ./gradlew -Dorg.gradle.console=plain quarkusDev
+    {{ GRADLEW }} -Dorg.gradle.console=plain quarkusDev
 
 # ./gradlew quarkusRun
 [group("build")]
 @run: check_tesla_env
-    ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
+    {{ GRADLEW }} -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
 
 [no-cd]
 [no-exit-message]
