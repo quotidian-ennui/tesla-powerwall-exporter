@@ -47,8 +47,6 @@ jobs:
           gradle-version: wrapper
       - name: Gradle
         id: gradle
-        env:
-          JDK_JAVA_OPTIONS: -Dpolyglot.js.nashorn-compat=true -Dpolyglot.engine.WarnInterpreterOnly=false
         run: |
           ./gradlew -PdisableSpotlessJava=false check
       - name: Build Result
