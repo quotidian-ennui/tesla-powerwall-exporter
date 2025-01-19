@@ -27,9 +27,9 @@ docker action="help": check_tesla_env
     #!/usr/bin/env bash
     # shellcheck disable=SC2068
     # shellcheck disable=SC1083
-    # shellcheck disable=SC2154
     set -eo pipefail
 
+    action="{{ action }}"
     docker_args=()
     docker_args+=("-p 9961:9961")
     docker_args+=("-e QUARKUS_HTTP_PORT=9961")
@@ -39,7 +39,7 @@ docker action="help": check_tesla_env
     docker_args+=("-e TESLA_PASSWORD=$TESLA_PASSWORD")
     docker_args+=("-e LOG_LEVEL=DEBUG")
     if [[ "$#" -ne "0" ]]; then shift; fi
-    case "{{ action }}" in
+    case "$action" in
       build|jvm)
         ./gradlew build
         docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
@@ -77,7 +77,7 @@ docker action="help": check_tesla_env
             "{{ DOCKER_IMAGE_TAG }}"
         ;;
       *)
-        echo "Unknown action: {{ action }}"
+        echo "Unknown action: $action"
         echo ""
         echo "just docker jvm | uber | native | chainguard which match the Dockerfile files in src/main/docker/"
         echo "just docker run | start to start a previously built container"
@@ -95,7 +95,6 @@ docker action="help": check_tesla_env
 publish type="native": clean
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
-    # shellcheck disable=SC2154
     set -eo pipefail
 
     _giturl_to_base () {
@@ -106,11 +105,12 @@ publish type="native": clean
       echo "$url"
     }
 
+    type="{{ type }}"
     gitRemote=$(git remote get-url origin 2>/dev/null | grep "github.com") || true
     imageName="ghcr.io/$(_giturl_to_base "$gitRemote")"
-    imageTag="$(git rev-parse --short HEAD)-{{ type }}"
+    imageTag="$(git rev-parse --short HEAD)-$type"
     if [[ "$#" -ne "0" ]]; then shift; fi
-    case "{{ type }}" in
+    case "$type" in
       jvm)
         ./gradlew build
         docker build --pull -t "$imageName:$imageTag" -f "{{ DOCKERFILE }}" .
@@ -124,7 +124,7 @@ publish type="native": clean
         docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_CGR }}" .
         ;;
       *)
-        echo "Unknown type: {{ type }}"
+        echo "Unknown type: $type"
         echo ""
         echo "Publish a docker image to ghcr.io using the current git ref"
         echo ""
@@ -139,13 +139,13 @@ publish type="native": clean
 release push="localonly":
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
-    # shellcheck disable=SC2154
     set -eo pipefail
 
+    push="{{ push }}"
     tag=$(./gradlew --quiet -Dorg.gradle.console=plain releaseVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+$")
     echo "Release: $tag"
     git tag -a "$tag" -m "release: $tag"
-    case "{{ push }}" in
+    case "$push" in
       push|github)
         git push --all
         git push --tags
@@ -153,6 +153,16 @@ release push="localonly":
       *)
         ;;
     esac
+
+# Print the current calculated version
+[group("release")]
+version:
+    #!/usr/bin/env bash
+    # shellcheck disable=SC1083
+    set -eo pipefail
+
+    ver=$(./gradlew --quiet -Dorg.gradle.console=plain printVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+.*$")
+    echo "Version: $ver"
 
 # Cleanup
 [group("build")]
@@ -165,10 +175,10 @@ release push="localonly":
 build style="uber":
     #!/usr/bin/env bash
     # shellcheck disable=SC1083
-    # shellcheck disable=SC2154
     set -eo pipefail
 
-    case "{{ style }}" in
+    style="{{ style }}"
+    case "$style" in
       jar)
         ./gradlew build
         ;;
@@ -180,7 +190,12 @@ build style="uber":
         ;;
       *)
         echo "Unknown build style: $style"
-        echo "just build jar | uber | native"
+        echo ""
+        echo "just build jar   : builds a jar using default configuration"
+        echo "just build uber  : builds an uber-jar"
+        echo "just build native: build a native executable"
+        echo ""
+        exit 0
         ;;
     esac
 
