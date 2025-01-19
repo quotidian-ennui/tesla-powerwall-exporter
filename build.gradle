@@ -30,23 +30,22 @@ semver {
 
 dependencies {
   implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
-  implementation 'io.quarkus:quarkus-scheduler'
-  implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
-  implementation 'io.quarkus:quarkus-arc'
-  implementation 'io.quarkus:quarkus-jackson'
-  implementation 'io.quarkus:quarkus-rest-client-jackson'
-  implementation 'io.quarkus:quarkus-smallrye-stork'
-  implementation 'io.smallrye.stork:stork-service-discovery-static-list'
-  implementation 'io.smallrye.stork:stork-load-balancer-sticky'
-  implementation 'org.slf4j:slf4j-api'
-  implementation 'org.apache.commons:commons-text'
-  implementation 'org.apache.commons:commons-lang3'
-  testImplementation 'io.quarkus:quarkus-junit5'
-  testImplementation 'org.wiremock:wiremock:3.10.0'
-  testImplementation 'io.quarkus:quarkus-jacoco'
+  implementation "io.quarkus:quarkus-scheduler"
+  implementation "io.quarkus:quarkus-micrometer-registry-prometheus"
+  implementation "io.quarkus:quarkus-arc"
+  implementation "io.quarkus:quarkus-jackson"
+  implementation "io.quarkus:quarkus-rest-client-jackson"
+  implementation "io.quarkus:quarkus-smallrye-stork"
+  implementation "io.smallrye.stork:stork-service-discovery-static-list"
+  implementation "io.smallrye.stork:stork-load-balancer-sticky"
+  implementation "org.apache.commons:commons-text"
+  implementation "org.apache.commons:commons-lang3"
+  testImplementation "io.quarkus:quarkus-junit5"
+  testImplementation "org.wiremock:wiremock:3.10.0"
+  testImplementation "io.quarkus:quarkus-jacoco"
 }
 
-group 'io.github.quotidianennui'
+group "io.github.quotidianennui"
 version semver.version
 
 lombok {
@@ -65,7 +64,7 @@ test {
   finalizedBy jacocoTestReport
   jacoco {
     // Force it into the same location as quarkus.
-    destinationFile = layout.buildDirectory.file('jacoco-quarkus.exec').get().asFile
+    destinationFile = layout.buildDirectory.file("jacoco-quarkus.exec").get().asFile
     excludeClassLoaders = ["*QuarkusClassLoader"]
   }
 }
@@ -78,12 +77,12 @@ jacocoTestReport {
 }
 
 compileJava {
-  options.encoding = 'UTF-8'
-  options.compilerArgs << '-parameters'
+  options.encoding = "UTF-8"
+  options.compilerArgs << "-parameters"
 }
 
 compileTestJava {
-  options.encoding = 'UTF-8'
+  options.encoding = "UTF-8"
 }
 
 spotless {

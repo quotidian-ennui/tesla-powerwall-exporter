@@ -12,55 +12,52 @@ import io.github.qe.powerwall.model.Login;
 import io.github.qe.powerwall.model.LoginResponse;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.quarkus.arc.log.LoggerName;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.jbosslog.JBossLog;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 
 @ApplicationScoped
-@Slf4j
+@JBossLog
 public class StatsCollector {
 
-  // This is the easy way to get stop log.error() from being
-  // emitted to the console when we run gradle test since we
-  // can turn off this logging in the %test profile.
-  @Inject
-  @LoggerName("powerwall.transient.errors")
-  Logger errorLogger;
+  private final Logger errorLogger = Logger.getLogger("powerwall.transient.errors");
 
-  @Inject @RestClient PowerwallService pwSvc;
-
-  @ConfigProperty(name = "powerwall.gateway.pw")
   @Getter(AccessLevel.PACKAGE)
-  String password;
+  private final String password;
 
-  @ConfigProperty(name = "powerwall.gateway.login")
   @Getter(AccessLevel.PACKAGE)
-  String email;
+  private final String email;
+
+  private final MeterRegistry registry;
+  private final PowerwallService pwSvc;
+  private final ObjectMapper mapper;
 
   @Getter(AccessLevel.PRIVATE)
   private String token;
-
-  private final MeterRegistry registry;
-
-  private final ObjectMapper mapper;
 
   private boolean loggedIn = false;
   private final Map<String, Object> pwStats = new HashMap<>();
   private final AtomicBoolean infoLogging = new AtomicBoolean(true);
 
-  public StatsCollector(ObjectMapper m, MeterRegistry registry) {
+  public StatsCollector(
+      ObjectMapper m,
+      MeterRegistry registry,
+      @RestClient PowerwallService pwSvc,
+      @ConfigProperty(name = "powerwall.gateway.login") String email,
+      @ConfigProperty(name = "powerwall.gateway.pw") String pw) {
     this.mapper = m;
     this.registry = registry;
+    this.pwSvc = pwSvc;
+    this.email = email;
+    this.password = pw;
     initMicrometer();
   }
 
@@ -78,7 +75,7 @@ public class StatsCollector {
       pwStats.putAll(buildStats(Metrics.system, pwSvc.getSystemStatus(getToken())));
       pwStats.putAll(buildStats(Metrics.percentage, pwSvc.getSystemStatusSOE(getToken())));
       logging("Successfully scraped stats");
-      logging("Powerwall stats: {}", pwStats);
+      logging("Powerwall stats: %s", pwStats);
       infoLogging.set(false);
     } catch (Exception e) {
       loggedIn = false;
@@ -122,9 +119,9 @@ public class StatsCollector {
 
   private void logging(String msg, Object... args) {
     if (infoLogging.get()) {
-      log.info(msg, args);
+      log.infof(msg, args);
     } else {
-      log.debug(msg, args);
+      log.debugf(msg, args);
     }
   }
 }
