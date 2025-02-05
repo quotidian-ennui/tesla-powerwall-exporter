@@ -17,7 +17,6 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 @QuarkusTest
 @TestProfile(Standard.class)
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 class MgmtInterfaceTest {
   @TestHTTPResource(value = "/management", management = true)
   URL mgmtUrl;
@@ -40,6 +39,7 @@ class MgmtInterfaceTest {
   }
 
   @Test
+  @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
   void testMgmtNetworks() throws Exception {
     String expected =
         String.format(
