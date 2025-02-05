@@ -49,7 +49,6 @@ class MgmtInterfaceTest {
     URL targetURL = URI.create(expected).toURL();
     try (InputStream in = targetURL.openStream()) {
       String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-      System.err.println(contents);
       assertThat(contents, Matchers.containsString("ethernet_tesla_internal_default"));
     }
   }
