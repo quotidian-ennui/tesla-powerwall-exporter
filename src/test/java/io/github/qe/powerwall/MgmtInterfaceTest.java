@@ -16,15 +16,15 @@ import org.junit.jupiter.api.Test;
 class MgmtInterfaceTest {
   @TestHTTPResource(value = "/management", management = true)
   URL mgmtUrl;
-  @Inject
-  StatsCollector service;
+
+  @Inject StatsCollector service;
 
   @Test
   void testMgmtLoginInfo() throws Exception {
     String expected =
-      String.format(
-        "%s://%s:%d/info/loginStatus",
-        mgmtUrl.getProtocol(), mgmtUrl.getHost(), mgmtUrl.getPort());
+        String.format(
+            "%s://%s:%d/info/loginStatus",
+            mgmtUrl.getProtocol(), mgmtUrl.getHost(), mgmtUrl.getPort());
     service.login();
     System.err.println(mgmtUrl);
     System.err.println(expected);

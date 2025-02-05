@@ -17,7 +17,6 @@ import io.quarkus.vertx.http.ManagementInterface;
 import io.vertx.core.Vertx;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +33,8 @@ import org.jboss.logging.Logger;
 public class StatsCollector {
 
   private final Logger errorLogger = Logger.getLogger("powerwall.transient.errors");
-  private static final String LOGIN_INFO = """
+  private static final String LOGIN_INFO =
+      """
   {"loggedin": "%s", "token": "%s"}""";
 
   @Getter(AccessLevel.PACKAGE)
@@ -46,11 +46,10 @@ public class StatsCollector {
   private final MeterRegistry registry;
   private final PowerwallService pwSvc;
   private final ObjectMapper mapper;
+  private final Vertx vertx;
 
   @Getter(AccessLevel.PRIVATE)
   private String token;
-
-  @Inject Vertx vertx;
 
   private boolean loggedIn = false;
   private final Map<String, Object> pwStats = new HashMap<>();
@@ -61,12 +60,14 @@ public class StatsCollector {
       MeterRegistry registry,
       @RestClient PowerwallService pwSvc,
       @ConfigProperty(name = "powerwall.gateway.login") String email,
-      @ConfigProperty(name = "powerwall.gateway.pw") String pw) {
+      @ConfigProperty(name = "powerwall.gateway.pw") String pw,
+      Vertx vertx) {
     this.mapper = m;
     this.registry = registry;
     this.pwSvc = pwSvc;
     this.email = email;
     this.password = pw;
+    this.vertx = vertx;
     initMicrometer();
   }
 

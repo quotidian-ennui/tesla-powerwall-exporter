@@ -157,8 +157,7 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
           get(urlEqualTo("/api/system_status")).willReturn(okJson(SYSTEM_JSON)));
       wiremockServer.givenThat(
           get(urlEqualTo("/api/system_status/soe")).willReturn(okJson(SYSTEM_SOE_JSON)));
-      wiremockServer.givenThat(
-        get(urlEqualTo("/api/networks")).willReturn(okJson(NETWORKS_JSON)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/networks")).willReturn(okJson(NETWORKS_JSON)));
     }
   }
 
@@ -173,8 +172,7 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
       wiremockServer.givenThat(
           get(urlEqualTo("/api/system_status")).willReturn(okJson(SYSTEM_JSON)));
       wiremockServer.givenThat(get(urlEqualTo("/api/system_status/soe")).willReturn(notFound()));
-      wiremockServer.givenThat(
-        get(urlEqualTo("/api/networks")).willReturn(okJson(NETWORKS_JSON)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/networks")).willReturn(okJson(NETWORKS_JSON)));
     }
   }
 
@@ -190,8 +188,7 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
           get(urlEqualTo("/api/meters/aggregates")).atPriority(1).willReturn(forbidden()));
       wiremockServer.givenThat(
           get(urlEqualTo("/api/system_status")).atPriority(1).willReturn(forbidden()));
-      wiremockServer.givenThat(
-        get(urlEqualTo("/api/networks")).willReturn(forbidden()));
+      wiremockServer.givenThat(get(urlEqualTo("/api/networks")).willReturn(forbidden()));
     }
   }
 
@@ -213,7 +210,7 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
       wiremockServer.givenThat(
           get(urlEqualTo("/api/system_status")).atPriority(1).willReturn(jsonResponse("{}", 401)));
       wiremockServer.givenThat(
-        get(urlEqualTo("/api/networks")).atPriority(1).willReturn(jsonResponse("{}", 401)));
+          get(urlEqualTo("/api/networks")).atPriority(1).willReturn(jsonResponse("{}", 401)));
     }
   }
 }
