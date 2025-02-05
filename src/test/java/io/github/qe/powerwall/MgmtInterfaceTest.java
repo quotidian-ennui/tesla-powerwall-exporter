@@ -17,7 +17,8 @@ class MgmtInterfaceTest {
   @TestHTTPResource(value = "/management", management = true)
   URL mgmtUrl;
 
-  @Inject StatsCollector service;
+  @Inject PowerwallService service;
+  @Inject ManagementInfo mgmtInfo;
 
   @Test
   void testMgmtLoginInfo() throws Exception {
@@ -26,8 +27,6 @@ class MgmtInterfaceTest {
             "%s://%s:%d/info/loginStatus",
             mgmtUrl.getProtocol(), mgmtUrl.getHost(), mgmtUrl.getPort());
     service.login();
-    System.err.println(mgmtUrl);
-    System.err.println(expected);
     URL targetURL = URI.create(expected).toURL();
     try (InputStream in = targetURL.openStream()) {
       String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
@@ -42,11 +41,10 @@ class MgmtInterfaceTest {
             "%s://%s:%d/info/networks",
             mgmtUrl.getProtocol(), mgmtUrl.getHost(), mgmtUrl.getPort());
     service.login();
-    System.err.println(mgmtUrl);
-    System.err.println(expected);
     URL targetURL = URI.create(expected).toURL();
     try (InputStream in = targetURL.openStream()) {
       String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+      System.err.println(contents);
       assertThat(contents, Matchers.containsString("ethernet_tesla_internal_default"));
     }
   }
