@@ -17,7 +17,29 @@ import java.util.Map;
 
 public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleManager {
 
-  private static final String TOKEN = """
+  private static final String NETWORKS_JSON =
+      """
+[
+  {
+    "network_name": "ethernet_tesla_internal_default",
+    "interface": "EthType"
+  },
+  {
+    "network_name": "gsm_tesla_internal_default",
+    "interface": "GsmType"
+  },
+  {
+    "network_name": "Customer_Wired",
+    "interface": "EthType"
+  },
+  {
+    "network_name": "Customer_Wireless",
+    "interface": "WifiType"
+  }
+ ]""";
+
+  private static final String TOKEN =
+      """
     { "token" : "123456" }
     """;
 
@@ -135,6 +157,7 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
           get(urlEqualTo("/api/system_status")).willReturn(okJson(SYSTEM_JSON)));
       wiremockServer.givenThat(
           get(urlEqualTo("/api/system_status/soe")).willReturn(okJson(SYSTEM_SOE_JSON)));
+      wiremockServer.givenThat(get(urlEqualTo("/api/networks")).willReturn(okJson(NETWORKS_JSON)));
     }
   }
 
@@ -149,6 +172,7 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
       wiremockServer.givenThat(
           get(urlEqualTo("/api/system_status")).willReturn(okJson(SYSTEM_JSON)));
       wiremockServer.givenThat(get(urlEqualTo("/api/system_status/soe")).willReturn(notFound()));
+      wiremockServer.givenThat(get(urlEqualTo("/api/networks")).willReturn(okJson(NETWORKS_JSON)));
     }
   }
 
@@ -164,6 +188,7 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
           get(urlEqualTo("/api/meters/aggregates")).atPriority(1).willReturn(forbidden()));
       wiremockServer.givenThat(
           get(urlEqualTo("/api/system_status")).atPriority(1).willReturn(forbidden()));
+      wiremockServer.givenThat(get(urlEqualTo("/api/networks")).willReturn(forbidden()));
     }
   }
 
@@ -184,6 +209,8 @@ public abstract class PowerwallEndpoint implements QuarkusTestResourceLifecycleM
               .willReturn(jsonResponse("{}", 401)));
       wiremockServer.givenThat(
           get(urlEqualTo("/api/system_status")).atPriority(1).willReturn(jsonResponse("{}", 401)));
+      wiremockServer.givenThat(
+          get(urlEqualTo("/api/networks")).atPriority(1).willReturn(jsonResponse("{}", 401)));
     }
   }
 }
