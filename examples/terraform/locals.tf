@@ -20,8 +20,8 @@ locals {
   }
   powerwall_secrets = {
     name     = "powerwall-export-secret"
-    user     = "MyUserName"
-    password = "MyPassword"
+    user     = "MyUserName" 
+    password = "MyPassword" # gitleaks:allow
     ip_addr  = "10.0.0.1"
   }
   powerwall_env_vars = {
