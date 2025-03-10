@@ -1,9 +1,0 @@
-# gradle build -Dquarkus.package.jar.enabled=false \
-#            -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true \
-#            -Dquarkus.native.container-runtime=docker
-FROM cgr.dev/chainguard/graalvm-native:latest
-
-WORKDIR /work
-EXPOSE 8080
-COPY --chown=nonroot.nonroot build/*-runner /work/application
-ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]

@@ -5,7 +5,6 @@ DOCKER_PUBLIC_IMAGE_LATEST := "ghcr.io/quotidian-ennui/tesla-powerwall-exporter:
 DOCKERFILE := justfile_directory() / "src/main/docker/Dockerfile.jvm"
 DOCKERFILE_UBER := justfile_directory() / "src/main/docker/Dockerfile.jvm-uber"
 DOCKERFILE_NATIVE := justfile_directory() / "src/main/docker/Dockerfile.native-micro"
-DOCKERFILE_CGR := justfile_directory() / "src/main/docker/Dockerfile.cgr"
 DOCKER_IMAGE_TAG := `whoami` / LOCAL_DOCKER_CONTAINER + ":latest"
 OS_NAME := `uname -o | tr '[:upper:]' '[:lower:]'`
 GRADLE_NATIVE_OPTS := "-Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker"
@@ -40,21 +39,13 @@ docker action="help": check_tesla_env
     docker_args+=("-e LOG_LEVEL=DEBUG")
     if [[ "$#" -ne "0" ]]; then shift; fi
     case "$action" in
-      build|jvm)
-        ./gradlew build
-        docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE }}" .
-        ;;
       uber)
         ./gradlew build {{ GRADLE_UBER_OPTS }}
         docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_UBER }}" .
         ;;
-      native)
+      build|native)
         ./gradlew build {{ GRADLE_NATIVE_OPTS }}
         docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_NATIVE }}" .
-        ;;
-      chainguard|cgr)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
-        docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_CGR }}" .
         ;;
       latest)
         just check_tesla_env
@@ -79,7 +70,7 @@ docker action="help": check_tesla_env
       *)
         echo "Unknown action: $action"
         echo ""
-        echo "just docker jvm | uber | native | chainguard which match the Dockerfile files in src/main/docker/"
+        echo "just docker uber | native to build a container using uber-jar or quarkus native"
         echo "just docker run | start to start a previously built container"
         echo "just docker latest to run the public latest image"
         echo "just docker latest-native to run the public latest native image"
@@ -111,24 +102,20 @@ publish type="native": clean
     imageTag="$(git rev-parse --short HEAD)-$type"
     if [[ "$#" -ne "0" ]]; then shift; fi
     case "$type" in
-      jvm)
-        ./gradlew build
-        docker build --pull -t "$imageName:$imageTag" -f "{{ DOCKERFILE }}" .
+      uber)
+        ./gradlew build {{ GRADLE_UBER_OPTS }}
+        docker build --pull -t "$imageName:$imageTag" -f "{{ DOCKERFILE_UBER }}" .
         ;;
       native)
         ./gradlew build {{ GRADLE_NATIVE_OPTS }}
         docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_NATIVE }}" .
-        ;;
-      chainguard)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
-        docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_CGR }}" .
         ;;
       *)
         echo "Unknown type: $type"
         echo ""
         echo "Publish a docker image to ghcr.io using the current git ref"
         echo ""
-        echo "just publish jvm | native | chainguard which match the Dockerfile files in src/main/docker/"
+        echo "just publish uber | native"
         exit 0
         ;;
     esac

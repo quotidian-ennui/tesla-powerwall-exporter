@@ -1,9 +1,0 @@
-# gradle build -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
-# docker build . -f src/main/docker/Dockerfile.cgr -t quarkus/tesla-jvm:chainguard
-# docker run --name -p9961:9961 -e NODE_PORT=9961 -e TESLA_ADDR="$TESLA_ADDR" \
-#   -e "TESLA_EMAIL=$TESLA_EMAIL" -e TESLA_PASSWORD="$TESLA_PASSWORD" \
-#   quarkus/tesla-jvm:chainguard
-FROM cgr.dev/chainguard/jre-lts:latest
-
-COPY build/*-runner.jar /app/tesla-runner.jar
-CMD ["-jar", "tesla-runner.jar"]
