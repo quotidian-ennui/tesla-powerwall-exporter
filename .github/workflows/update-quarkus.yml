@@ -53,7 +53,7 @@ jobs:
       - name: Run QuarkusUpdate
         id: quarkusUpdate
         run: |
-          ./gradlew quarkusUpdate
+          ./gradlew quarkusUpdate --rewrite
       - name: Updated Quarkus Version
         id: latestQuarkus
         run: |
