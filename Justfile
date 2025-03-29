@@ -9,6 +9,8 @@ DOCKER_IMAGE_TAG := `whoami` / LOCAL_DOCKER_CONTAINER + ":latest"
 OS_NAME := `uname -o | tr '[:upper:]' '[:lower:]'`
 GRADLE_NATIVE_OPTS := "-Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker"
 GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar"
+# Set this to be --no-problems-report for 8.12+
+GRADLE_OPTS := env_var_or_default("GRADLE_OPTS", "")
 
 # show recipes
 [private]
@@ -40,11 +42,11 @@ docker action="help": check_tesla_env
     if [[ "$#" -ne "0" ]]; then shift; fi
     case "$action" in
       uber)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
+        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_UBER_OPTS }}
         docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_UBER }}" .
         ;;
       build|native)
-        ./gradlew build {{ GRADLE_NATIVE_OPTS }}
+        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_NATIVE_OPTS }}
         docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_NATIVE }}" .
         ;;
       latest)
@@ -103,11 +105,11 @@ publish type="native": clean
     if [[ "$#" -ne "0" ]]; then shift; fi
     case "$type" in
       uber)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
+        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_UBER_OPTS }}
         docker build --pull -t "$imageName:$imageTag" -f "{{ DOCKERFILE_UBER }}" .
         ;;
       native)
-        ./gradlew build {{ GRADLE_NATIVE_OPTS }}
+        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_NATIVE_OPTS }}
         docker build --pull -t  "$imageName:$imageTag" -f "{{ DOCKERFILE_NATIVE }}" .
         ;;
       *)
@@ -129,7 +131,7 @@ release push="localonly":
     set -eo pipefail
 
     push="{{ push }}"
-    tag=$(./gradlew --quiet -Dorg.gradle.console=plain releaseVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+$")
+    tag=$(./gradlew {{ GRADLE_OPTS }} --quiet -Dorg.gradle.console=plain releaseVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+$")
     echo "Release: $tag"
     git tag -a "$tag" -m "release: $tag"
     case "$push" in
@@ -148,7 +150,7 @@ version:
     # shellcheck disable=SC1083
     set -eo pipefail
 
-    ver=$(./gradlew --quiet -Dorg.gradle.console=plain printVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+.*$")
+    ver=$(./gradlew {{ GRADLE_OPTS }} --quiet -Dorg.gradle.console=plain printVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+.*$")
     echo "Version: $ver"
 
 # Cleanup
@@ -167,13 +169,13 @@ build style="uber":
     style="{{ style }}"
     case "$style" in
       jar)
-        ./gradlew build
+        ./gradlew {{ GRADLE_OPTS }} build
         ;;
       uber)
-        ./gradlew build {{ GRADLE_UBER_OPTS }}
+        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_UBER_OPTS }}
         ;;
       native)
-        ./gradlew build {{ GRADLE_NATIVE_OPTS }}
+        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_NATIVE_OPTS }}
         ;;
       *)
         echo "Unknown build style: $style"
@@ -189,13 +191,13 @@ build style="uber":
 # ./gradlew spotlessApply
 [group("build")]
 @fmt:
-    ./gradlew --quiet -PdisableSpotlessJava=false spotlessApply
+    ./gradlew {{ GRADLE_OPTS }} --quiet -PdisableSpotlessJava=false spotlessApply
     just --fmt --unstable
 
 # ./gradlew check (with spotlessApply)
 [group("build")]
 @check:
-    ./gradlew -PdisableSpotlessJava=false spotlessApply check
+    ./gradlew {{ GRADLE_OPTS }} -PdisableSpotlessJava=false spotlessApply check
 
 # ./gradlew test
 [group("build")]
@@ -205,12 +207,12 @@ build style="uber":
 # ./gradlew quarkusDev
 [group("build")]
 @dev: check_tesla_env
-    ./gradlew -Dorg.gradle.console=plain quarkusDev
+    ./gradlew {{ GRADLE_OPTS }} -Dorg.gradle.console=plain quarkusDev
 
 # ./gradlew quarkusRun
 [group("build")]
 @run: check_tesla_env
-    ./gradlew -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
+    ./gradlew {{ GRADLE_OPTS }} -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
 
 [no-cd]
 [no-exit-message]
