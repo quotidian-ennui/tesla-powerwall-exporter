@@ -10,7 +10,7 @@ OS_NAME := `uname -o | tr '[:upper:]' '[:lower:]'`
 GRADLE_NATIVE_OPTS := "-Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker"
 GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar"
 # Set this to be --no-problems-report for 8.12+
-GRADLE_OPTS := env_var_or_default("GRADLE_OPTS", "")
+GRADLE_OPTS := env_var_or_default("GRADLE_OPTS", "--no-problems-report")
 
 # show recipes
 [private]
@@ -202,7 +202,7 @@ build style="uber":
 # ./gradlew test
 [group("build")]
 @test:
-    ./gradlew test
+    ./gradlew {{ GRADLE_OPTS }} test
 
 # ./gradlew quarkusDev
 [group("build")]
