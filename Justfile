@@ -1,4 +1,6 @@
 set positional-arguments := true
+set unstable := true
+set script-interpreter := ['/usr/bin/env', 'bash']
 
 LOCAL_DOCKER_CONTAINER := "powerwall-export"
 DOCKER_PUBLIC_IMAGE_LATEST := "ghcr.io/quotidian-ennui/tesla-powerwall-exporter:latest"
@@ -9,7 +11,9 @@ DOCKER_IMAGE_TAG := `whoami` / LOCAL_DOCKER_CONTAINER + ":latest"
 OS_NAME := `uname -o | tr '[:upper:]' '[:lower:]'`
 GRADLE_NATIVE_OPTS := "-Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker"
 GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar"
+
 # Set this to be --no-problems-report for 8.12+
+
 GRADLE_OPTS := env_var_or_default("GRADLE_OPTS", "--no-problems-report")
 
 # show recipes
@@ -24,8 +28,9 @@ GRADLE_OPTS := env_var_or_default("GRADLE_OPTS", "--no-problems-report")
 
 # Use Docker to build/run
 [group("docker")]
+[script]
 docker action="help": check_tesla_env
-    #!/usr/bin/env bash
+    #
     # shellcheck disable=SC2068
     # shellcheck disable=SC1083
     set -eo pipefail
@@ -85,8 +90,9 @@ docker action="help": check_tesla_env
 
 # Publish a snapshot image to ghcr.io
 [group("docker")]
+[script]
 publish type="native": clean
-    #!/usr/bin/env bash
+    #
     # shellcheck disable=SC1083
     set -eo pipefail
 
@@ -125,8 +131,9 @@ publish type="native": clean
 
 # Tag & release
 [group("release")]
+[script]
 release push="localonly":
-    #!/usr/bin/env bash
+    #
     # shellcheck disable=SC1083
     set -eo pipefail
 
@@ -145,8 +152,9 @@ release push="localonly":
 
 # Print the current calculated version
 [group("release")]
+[script]
 version:
-    #!/usr/bin/env bash
+    #
     # shellcheck disable=SC1083
     set -eo pipefail
 
@@ -161,8 +169,9 @@ version:
 
 # Do a build perhaps in the style of jar|uber|native
 [group("build")]
+[script]
 build style="uber":
-    #!/usr/bin/env bash
+    #
     # shellcheck disable=SC1083
     set -eo pipefail
 
@@ -217,8 +226,9 @@ build style="uber":
 [no-cd]
 [no-exit-message]
 [private]
+[script]
 check_tesla_env:
-    #!/usr/bin/env bash
+    #
     set -eo pipefail
     if [[ -z "$TESLA_ADDR" ]]; then echo "TESLA_ADDR not defined; abort"; exit 1; fi
     if [[ -z "$TESLA_EMAIL" ]]; then echo "TESLA_EMAIL not defined; abort"; exit 1; fi
