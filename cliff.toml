@@ -29,12 +29,26 @@ body = """
         - {% if commit.breaking %}💥(**BREAKING**) {% endif %}{% if commit.scope %}({{ commit.scope }}) {% endif %}{{ commit.message | upper_first | trim}} by {{commit.author.name}}\
     {% endfor %}
 {% endfor %}
+### ℹ️ Commit Statistics
+
+- {{ statistics.commit_count }} commit(s) contributed to the release.
+- {{ statistics.commits_timespan | default(value=0) }} day(s) passed between the first and last commit.
+{%- if statistics.days_passed_since_last_release %}
+- {{ statistics.days_passed_since_last_release }} day(s) since last release
+{%- endif %}
+- {{ statistics.links | length }} linked issue(s) detected in commits.
+{%- if statistics.links | length > 0 %}
+    {%- for link in statistics.links %}
+        {{ "  " }}- [{{ link.text }}]({{ link.href }}) (referenced {{ link.count }} time(s))
+    {%- endfor %}
+{%- endif %}
 {% if version %}\
     {% if previous.version %}\
       **Full Changelog**: https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/compare/{{ previous.version }}...{{ version }}\
     {% endif %}\
 {% endif -%}\
 {% raw %}\n{% endraw %}
+
 """
 # remove the leading and trailing whitespace from the template
 trim = true
@@ -65,6 +79,10 @@ commit_preprocessors = [
     { pattern = '^Bump (.*)', replace = "deps: Bump $1"},
     { pattern = '^deps: bump quarkus to (.*)', replace="deps(java): Bump quarkus to $1"},
     { pattern = '^updatecli: (.*)', replace = "deps(updatecli): $1"},
+]
+
+link_parsers = [
+    { pattern = '\((\w+\s)?#([0-9]+)\)', href = "([#${2}](https://github.com/quotidian-ennui/tesla-powerwall-exporter/issues/${2}))", text="${2}"},
 ]
 
 # regex for parsing and grouping commits
