@@ -170,7 +170,7 @@ version:
 # Do a build perhaps in the style of jar|uber|native
 [group("build")]
 [script]
-build style="uber":
+build style="native":
     #
     # shellcheck disable=SC1083
     set -eo pipefail
