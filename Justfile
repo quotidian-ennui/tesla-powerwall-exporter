@@ -165,7 +165,7 @@ version:
 [group("build")]
 @clean:
     rm -rf node_modules build bin
-    -docker images | grep -e "<none>" -e "{{ LOCAL_DOCKER_CONTAINER }}" | awk '{print $3}' | xargs -r docker rmi
+    -docker images --format json | jq -c '{ image: .Repository, tag: .Tag, id: .ID }' | grep -e "<none>" -e "{{ LOCAL_DOCKER_CONTAINER }}" | jq -r '.id' | xargs -r docker rmi
 
 # Do a build perhaps in the style of jar|uber|native
 [group("build")]
