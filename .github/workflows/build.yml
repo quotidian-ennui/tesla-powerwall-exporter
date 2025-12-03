@@ -30,7 +30,7 @@ jobs:
           context: ${{ env.STATUS_CONTEXT }}
           label_prefix: ${{ env.LABEL_PREFIX }}
       - name: Checkout branch
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           ref: ${{ github.event.client_payload.base.ref }}
           fetch-depth: 0
@@ -70,7 +70,7 @@ jobs:
       - gradle
     steps:
       - name: Checkout branch
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           ref: ${{ github.event.client_payload.base.ref }}
           persist-credentials: false
