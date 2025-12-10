@@ -10,10 +10,11 @@ on:
       - push-trigger
   workflow_dispatch:
 
-permissions:
-  contents: write
-  packages: write
+permissions: {}
 
 jobs:
   build:
+    permissions:
+      contents: write
+      packages: write
     uses: ./.github/workflows/docker-image.yml

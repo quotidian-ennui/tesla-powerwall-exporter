@@ -9,6 +9,8 @@ env:
   STATUS_CONTEXT: "Gradle Check"
   LABEL_PREFIX: "build_"
 
+permissions: {}
+
 jobs:
   gradle:
     runs-on: ubuntu-latest
@@ -65,7 +67,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Dependabot Merge
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
     needs:
       - gradle
     steps:
