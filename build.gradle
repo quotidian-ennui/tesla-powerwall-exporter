@@ -40,7 +40,7 @@ dependencies {
   implementation "io.smallrye.stork:stork-load-balancer-sticky"
   implementation "org.apache.commons:commons-text"
   implementation "org.apache.commons:commons-lang3"
-  testImplementation "io.quarkus:quarkus-junit5"
+  testImplementation "io.quarkus:quarkus-junit"
   testImplementation "org.wiremock:wiremock:3.13.2"
   testImplementation "io.quarkus:quarkus-jacoco"
 }
