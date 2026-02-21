@@ -24,7 +24,7 @@ GRADLE_OPTS := env_var_or_default("GRADLE_OPTS", "--no-problems-report")
 # Show proposed release notes
 [group("release")]
 @changelog *args='--unreleased':
-    GITHUB_TOKEN=$(gh auth token) git cliff --github-repo "quotidian-ennui/tesla-powerwall-exporter" "$@" 2>/dev/null
+   git cliff "$@" 2>/dev/null
 
 # Use Docker to build/run
 [group("docker")]
@@ -222,6 +222,15 @@ build style="native":
 [group("build")]
 @run: check_tesla_env
     ./gradlew {{ GRADLE_OPTS }} -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
+
+
+# pin workflows using pinact
+[group("housekeeping")]
+[script]
+gha *args="":
+    pinact run {{ args }}
+
+alias pin-actions := gha
 
 [no-cd]
 [no-exit-message]

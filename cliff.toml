@@ -45,7 +45,7 @@ body = """
 {% if version %}\
     {% if previous.version %}\
       {%- raw %}\n{% endraw -%}
-      **Full Changelog**: https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/compare/{{ previous.version }}...{{ version }}\
+      **Full Changelog**: https://github.com/quotidian-ennui/tesla-powerwall-exporter/compare/{{ previous.version }}...{{ version }}\
     {% endif %}\
 {% endif -%}\
 {%- raw %}\n{% endraw -%}
