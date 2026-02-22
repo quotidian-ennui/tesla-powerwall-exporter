@@ -4,17 +4,15 @@ set script-interpreter := ['/usr/bin/env', 'bash']
 
 LOCAL_DOCKER_CONTAINER := "powerwall-export"
 DOCKER_PUBLIC_IMAGE_LATEST := "ghcr.io/quotidian-ennui/tesla-powerwall-exporter:latest"
-DOCKERFILE := justfile_directory() / "src/main/docker/Dockerfile.jvm"
 DOCKERFILE_UBER := justfile_directory() / "src/main/docker/Dockerfile.jvm-uber"
 DOCKERFILE_NATIVE := justfile_directory() / "src/main/docker/Dockerfile.native-micro"
 DOCKER_IMAGE_TAG := `whoami` / LOCAL_DOCKER_CONTAINER + ":latest"
-OS_NAME := `uname -o | tr '[:upper:]' '[:lower:]'`
 GRADLE_NATIVE_OPTS := "-Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker"
 GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar"
 
 # Set this to be --no-problems-report for 8.12+
 
-GRADLE_OPTS := env_var_or_default("GRADLE_OPTS", "--no-problems-report")
+GRADLE_OPTS := env("GRADLE_OPTS", "--no-problems-report")
 
 # show recipes
 [private]
@@ -24,7 +22,7 @@ GRADLE_OPTS := env_var_or_default("GRADLE_OPTS", "--no-problems-report")
 # Show proposed release notes
 [group("release")]
 @changelog *args='--unreleased':
-   git cliff "$@" 2>/dev/null
+    git cliff "$@" 2>/dev/null
 
 # Use Docker to build/run
 [group("docker")]
@@ -233,7 +231,6 @@ build style="native":
 [group("build")]
 @run: check_tesla_env
     ./gradlew {{ GRADLE_OPTS }} -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
-
 
 # pin workflows using pinact
 [group("housekeeping")]
