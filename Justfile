@@ -137,13 +137,24 @@ release push="localonly":
     # shellcheck disable=SC1083
     set -eo pipefail
 
+    check_uptodate() {
+      default_branch=$(git remote show "origin" | grep 'HEAD branch' | cut -d' ' -f5)
+      remote_hash=$(git ls-remote origin "refs/heads/$default_branch" | cut -f1)
+      local_hash=$(git rev-parse "$(git branch --show-current)")
+      if [[ "$remote_hash" != "$local_hash" ]]; then
+        echo "⚠️ Remote hash differs, are we up to date?"
+        exit 1
+      fi
+    }
+
+    git diff --quiet || (echo "⚠️ git is dirty" && exit 1)
+    check_uptodate
     push="{{ push }}"
     tag=$(./gradlew {{ GRADLE_OPTS }} --quiet -Dorg.gradle.console=plain releaseVersion 2>/dev/null | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+$")
     echo "Release: $tag"
     git tag -a "$tag" -m "release: $tag"
     case "$push" in
-      push|github)
-        git push --all
+      push|github|gh)
         git push --tags
         ;;
       *)
