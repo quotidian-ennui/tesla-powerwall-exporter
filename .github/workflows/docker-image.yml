@@ -35,7 +35,7 @@ jobs:
         env:
           DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: runtimeClasspath
       - name: docker-build-push
-        uses: quotidian-ennui/actions-olio/docker-image-builder@2224d6e995321a927dcefae3c67cb7fa63510728 # v0.8.3
+        uses: quotidian-ennui/actions-olio/docker-image-builder@1676ca6e5208a6f314f6c2255bdd8a072ddc33eb # v0.9.0
         with:
           registry_push: true
           dockerfile: ./src/main/docker/Dockerfile.jvm-uber
@@ -70,7 +70,7 @@ jobs:
         run: |
           ./gradlew build -Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker
       - name: docker-build-push
-        uses: quotidian-ennui/actions-olio/docker-image-builder@2224d6e995321a927dcefae3c67cb7fa63510728 # v0.8.3
+        uses: quotidian-ennui/actions-olio/docker-image-builder@1676ca6e5208a6f314f6c2255bdd8a072ddc33eb # v0.9.0
         with:
           registry_push: true
           dockerfile: ./src/main/docker/Dockerfile.native-micro
