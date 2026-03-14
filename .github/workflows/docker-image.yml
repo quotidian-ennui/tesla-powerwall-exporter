@@ -7,11 +7,29 @@ on:
 permissions: {}
 
 jobs:
-  docker-build-image:
+  docker-build-matrix:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
+    strategy:
+      matrix:
+        docker_target: ["uber", "native"]
+        include:
+          - docker_target: uber
+            docker_tag_suffix: ""
+            docker_image_platforms: linux/amd64,linux/arm64/v8
+            gradle_build_params: -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
+            gradle_cache: enabled
+            dependency_graph: generate-and-submit
+            dockerfile: ./src/main/docker/Dockerfile.jvm-uber
+          - docker_target: native
+            docker_tag_suffix: -native
+            docker_image_platforms: linux/amd64
+            gradle_cache: disabled
+            gradle_build_params: -Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker
+            dependency_graph: disabled
+            dockerfile: ./src/main/docker/Dockerfile.native-micro
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -27,55 +45,22 @@ jobs:
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
         id: gradle
         with:
-          dependency-graph: generate-and-submit
+          dependency-graph: ${{ matrix.dependency_graph }}
+          cache-read-only: ${{ github.ref != 'refs/heads/main' || matrix.gradle_cache == 'disabled' }}
       - name: Build
         id: build
-        run: |
-          ./gradlew build -Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar
         env:
           DEPENDENCY_GRAPH_INCLUDE_CONFIGURATIONS: runtimeClasspath
-      - name: docker-build-push
-        uses: quotidian-ennui/actions-olio/docker-image-builder@1676ca6e5208a6f314f6c2255bdd8a072ddc33eb # v0.9.0
-        with:
-          registry_push: true
-          dockerfile: ./src/main/docker/Dockerfile.jvm-uber
-          image_platforms: linux/amd64,linux/arm64/v8
-          ghcr_image_name: ghcr.io/${{ github.repository }}
-          ghcr_user: ${{ github.repository_owner }}
-          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-          cache_from: type=gha
-          cache_to: type=gha,mode=max
-
-  docker-build-native:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Set up JDK
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
-        with:
-          java-version: 21
-          distribution: "temurin"
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
-        id: gradle
-      - name: Build
-        id: build
+          BUILD_PROPERTIES: ${{ matrix.gradle_build_params }}
         run: |
-          ./gradlew build -Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker
+          ./gradlew build $BUILD_PROPERTIES
       - name: docker-build-push
         uses: quotidian-ennui/actions-olio/docker-image-builder@1676ca6e5208a6f314f6c2255bdd8a072ddc33eb # v0.9.0
         with:
           registry_push: true
-          dockerfile: ./src/main/docker/Dockerfile.native-micro
-          image_platforms: linux/amd64
-          image_tag_suffix: "-native"
+          dockerfile: ${{ matrix.dockerfile }}
+          image_platforms: ${{ matrix.docker_image_platforms }}
+          image_tag_suffix: ${{ matrix.docker_tag_suffix }}
           ghcr_image_name: ghcr.io/${{ github.repository }}
           ghcr_user: ${{ github.repository_owner }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
