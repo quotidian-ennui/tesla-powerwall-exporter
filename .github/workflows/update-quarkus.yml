@@ -34,16 +34,11 @@ jobs:
           private-key: ${{ secrets.WORKFLOW_UPDATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: "${{ github.event.repository.name}}"
-      - name: Set up JDK
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      - name: Setup java
+        uses: quotidian-ennui/actions-olio/setup-java-gradle@main
         with:
-          java-version: 21
+          java-version: "21"
           distribution: "temurin"
-      - name: Gradle Setup
-        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
-        id: gradle
-        with:
-          gradle-version: wrapper
       - name: Current Quarkus Version
         id: currentQuarkus
         run: |
@@ -58,7 +53,7 @@ jobs:
       - name: Run QuarkusUpdate
         id: quarkusUpdate
         run: |
-          ./gradlew quarkusUpdate --rewrite
+          ./gradlew --no-daemon quarkusUpdate --rewrite
       - name: Updated Quarkus Version
         id: latestQuarkus
         run: |
