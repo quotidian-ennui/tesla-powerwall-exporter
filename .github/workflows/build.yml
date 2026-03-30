@@ -47,6 +47,9 @@ jobs:
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
         with:
           gradle-version: wrapper
+          cache-disabled: true
+      - name: Gradle Cache
+        uses: quotidian-ennui/actions-olio/dumb-gradle-cache@feat/dumb-gradle-cache
       - name: Gradle
         id: gradle
         run: |
