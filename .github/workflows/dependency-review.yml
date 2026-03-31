@@ -26,6 +26,7 @@ jobs:
           vulnerability-check: true
           license-check: true
           fail-on-severity: moderate
+          allow-dependencies-licenses: 'pkg:githubactions/quotidian-ennui/actions-olio/pr-trigger, pkg:githubactions/quotidian-ennui/actions-olio/docker-image-builder' 
 
   review-success:
     needs:
