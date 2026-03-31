@@ -1,0 +1,18 @@
+# This is the 'CVE' or GHSA ID.
+"CVE-2026-33871":
+  # a list of packages affected, it's usually a 1-1 relationship, but who knows.
+  packages:
+    - io.netty:netty-codec-http2
+  # Can be one of: fix_started, inaccurate, no_bandwidth, not_used, tolerable_risk
+  reason: tolerable_risk
+  # Short comment for the dismissal reason
+  comment: pinned by Quarkus BOM
+  commentary: |-
+    potentially a problem, but my local instance is _not exposed to the outside world_
+"CVE-2026-33870":
+  packages:
+    - io.netty:netty-codec-http
+  reason: tolerable_risk
+  comment: pinned by Quarkus BOM
+  commentary: |-
+    potentially a problem, but my local instance is _not exposed to the outside world_
