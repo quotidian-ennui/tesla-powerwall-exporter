@@ -4,8 +4,16 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     open-pull-requests-limit: 20
+    cooldown:
+      default-days: 3
+      semver-major-days: 7
+      semver-minor-days: 5
+      semver-patch-days: 3
     schedule:
       interval: "daily"
+      time: "04:12"
+      timezone: "Europe/London"
+    rebase-strategy: disabled
     allow:
       - dependency-type: "all"
     commit-message:
@@ -16,11 +24,14 @@ updates:
     open-pull-requests-limit: 20
     schedule:
       interval: "daily"
+      time: "04:17"
+      timezone: "Europe/London"
+    rebase-strategy: disabled
     allow:
       - dependency-type: "all"
     commit-message:
       prefix: "deps(ci): "
     groups:
-      actions-olio:
+      workflows-olio:
         patterns:
-          - "quotidian-ennui/actions-olio/*"
+          - "quotidian-ennui/workflows-olio/*"
