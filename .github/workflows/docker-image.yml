@@ -51,7 +51,7 @@ jobs:
         run: |
           ./gradlew --no-daemon build $BUILD_PROPERTIES
       - name: docker-build-push
-        uses: quotidian-ennui/actions-olio/docker-image-builder@83871db203c510c8c8d65292f24ebf5437728e7c # v0.9.1
+        uses: quotidian-ennui/actions-olio/docker-image-builder@80eb94186f07a299ea6a6954d56ee20926db1cd7 # v0.10.1
         with:
           registry_push: true
           dockerfile: ${{ matrix.dockerfile }}
