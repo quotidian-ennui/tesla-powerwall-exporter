@@ -20,3 +20,7 @@ updates:
       - dependency-type: "all"
     commit-message:
       prefix: "deps(ci): "
+    groups:
+      actions-olio:
+        patterns:
+          - "quotidian-ennui/actions-olio/*"
