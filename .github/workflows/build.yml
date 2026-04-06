@@ -22,7 +22,7 @@ jobs:
       statuses: write
     steps:
       - name: Build Pending
-        uses: quotidian-ennui/actions-olio/commit-status-and-label@80eb94186f07a299ea6a6954d56ee20926db1cd7 # v0.10.1
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@a3996e3fcadc2a7170eb465d6e556f07c61965e5 # v0.10.2
         if: |
           github.event.client_payload.detail.pull_request != '' &&
           github.event.client_payload.base.sha != ''
@@ -38,7 +38,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Setup java
-        uses: quotidian-ennui/actions-olio/setup-java-gradle@80eb94186f07a299ea6a6954d56ee20926db1cd7 # v0.10.1
+        uses: quotidian-ennui/actions-olio/setup-java-gradle@a3996e3fcadc2a7170eb465d6e556f07c61965e5 # v0.10.2
         with:
           java-version: "21"
           distribution: "temurin"
@@ -51,7 +51,7 @@ jobs:
           (success() || failure()) &&
           github.event.client_payload.detail.pull_request != '' &&
           github.event.client_payload.base.sha != ''
-        uses: quotidian-ennui/actions-olio/commit-status-and-label@80eb94186f07a299ea6a6954d56ee20926db1cd7 # v0.10.1
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@a3996e3fcadc2a7170eb465d6e556f07c61965e5 # v0.10.2
         with:
           state: ${{ steps.gradle.outcome }}
           sha: ${{ github.event.client_payload.base.sha }}
@@ -82,14 +82,14 @@ jobs:
           repositories: "${{ github.event.repository.name}}"
       - name: Repository Action Merge
         id: action_merge
-        uses: quotidian-ennui/actions-olio/dependabot-merge@80eb94186f07a299ea6a6954d56ee20926db1cd7 # v0.10.1
+        uses: quotidian-ennui/actions-olio/dependabot-merge@a3996e3fcadc2a7170eb465d6e556f07c61965e5 # v0.10.2
         with:
           token: ${{ steps.app-token.outputs.token }}
           change_filter: ".github/workflows/**"
           merge_commentary: "Merge Workflow Actions"
       - name: Dependabot Merge
         id: merge_gradle_dependencies
-        uses: quotidian-ennui/actions-olio/dependabot-merge@80eb94186f07a299ea6a6954d56ee20926db1cd7 # v0.10.1
+        uses: quotidian-ennui/actions-olio/dependabot-merge@a3996e3fcadc2a7170eb465d6e556f07c61965e5 # v0.10.2
         with:
           token: ${{ steps.app-token.outputs.token }}
           change_filter: "**/build.gradle,**/build.gradle.kts"

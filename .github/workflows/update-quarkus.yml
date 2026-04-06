@@ -35,7 +35,7 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: "${{ github.event.repository.name}}"
       - name: Setup java
-        uses: quotidian-ennui/actions-olio/setup-java-gradle@80eb94186f07a299ea6a6954d56ee20926db1cd7 # v0.10.1
+        uses: quotidian-ennui/actions-olio/setup-java-gradle@a3996e3fcadc2a7170eb465d6e556f07c61965e5 # v0.10.2
         with:
           java-version: "21"
           distribution: "temurin"
