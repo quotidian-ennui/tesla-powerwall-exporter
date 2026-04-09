@@ -16,10 +16,9 @@ permissions: {}
 jobs:
   quarkus:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
-      contents: write
-      pull-requests: write
-      statuses: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -34,6 +33,8 @@ jobs:
           private-key: ${{ secrets.WORKFLOW_UPDATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: "${{ github.event.repository.name}}"
+          permission-contents: write
+          permission-pull-requests: write
       - name: Setup java
         uses: quotidian-ennui/actions-olio/setup-java-gradle@448a2329caa783bbfe2ad58fc2123f7e05efae89 # v0.10.3
         with:

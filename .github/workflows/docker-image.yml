@@ -8,6 +8,7 @@ permissions: {}
 
 jobs:
   docker-build-matrix:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     permissions:
       contents: write
