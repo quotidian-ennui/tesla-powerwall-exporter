@@ -63,17 +63,9 @@ jobs:
     timeout-minutes: 2
     runs-on: ubuntu-latest
     name: Dependabot Merge
-    permissions:
-      contents: write
-      pull-requests: write
     needs:
       - gradle
     steps:
-      - name: Checkout branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ github.event.client_payload.base.ref }}
-          persist-credentials: false
       - name: "Create Token"
         uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
         id: app-token
@@ -85,6 +77,12 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
           permission-workflows: write
+      - name: Checkout branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.client_payload.base.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
       - name: Repository Action Merge
         id: action_merge
         uses: quotidian-ennui/actions-olio/dependabot-merge@448a2329caa783bbfe2ad58fc2123f7e05efae89 # v0.10.3
