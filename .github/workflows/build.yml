@@ -95,7 +95,7 @@ jobs:
         uses: quotidian-ennui/actions-olio/dependabot-merge@448a2329caa783bbfe2ad58fc2123f7e05efae89 # v0.10.3
         with:
           token: ${{ steps.app-token.outputs.token }}
-          change_filter: "**/build.gradle,**/build.gradle.kts"
+          change_filter: "**/*.gradle*,**/build.gradle.kts,**/gradle-wrapper.properties,gradle/*.versions.toml,**/versions.properties"
           automerge_level: "semver-patch"
           merge_commentary: "Merge Gradle Dependencies"
           filter_separator: ","
