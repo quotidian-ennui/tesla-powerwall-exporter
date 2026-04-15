@@ -9,6 +9,7 @@ DOCKERFILE_NATIVE := justfile_directory() / "src/main/docker/Dockerfile.native-m
 DOCKER_IMAGE_TAG := `whoami` / LOCAL_DOCKER_CONTAINER + ":latest"
 GRADLE_NATIVE_OPTS := "-Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker"
 GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar"
+GRADLE_ENABLE_SPOTLESS := "-PdisableSpotlessJava=false -PdisableSpotlessGradle=false"
 
 # Set this to be --no-problems-report for 8.12+
 
@@ -209,13 +210,13 @@ build style="native":
 # ./gradlew spotlessApply
 [group("build")]
 @fmt:
-    ./gradlew {{ GRADLE_OPTS }} --quiet -PdisableSpotlessJava=false spotlessApply
+    ./gradlew {{ GRADLE_OPTS }} --quiet {{ GRADLE_ENABLE_SPOTLESS }} spotlessApply
     just --fmt --unstable
 
 # ./gradlew check (with spotlessApply)
 [group("build")]
 @check:
-    ./gradlew {{ GRADLE_OPTS }} -PdisableSpotlessJava=false spotlessApply check
+    ./gradlew {{ GRADLE_OPTS }}  {{ GRADLE_ENABLE_SPOTLESS }} spotlessApply check
 
 # ./gradlew test
 [group("build")]
