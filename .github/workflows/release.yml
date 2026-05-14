@@ -11,28 +11,9 @@ concurrency:
 permissions: {}
 
 jobs:
-  release:
-    timeout-minutes: 2
-    runs-on: ubuntu-latest
+  create-release:
+    uses: quotidian-ennui/workflows-olio/.github/workflows/create-release.yml@6099af4157e6653a07431f39552a6b36bb331d2b # v2.1.0
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Generate changelog
-        uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
-        id: changelog
-        with:
-          args: --current --github-repo "${{ github.repository }}"
-        env:
-          OUTPUT: CHANGELOG.md
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Release
-        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
-        with:
-          bodyFile: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          makeLatest: true
