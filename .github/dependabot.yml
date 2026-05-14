@@ -35,3 +35,15 @@ updates:
       workflows-olio:
         patterns:
           - "quotidian-ennui/workflows-olio/*"
+  - package-ecosystem: "docker"
+    directory: "src/main/docker"
+    open-pull-requests-limit: 20
+    schedule:
+      interval: "daily"
+      time: "04:17"
+      timezone: "Europe/London"
+    rebase-strategy: disabled
+    allow:
+      - dependency-type: "all"
+    commit-message:
+      prefix: "deps(docker-image): "
