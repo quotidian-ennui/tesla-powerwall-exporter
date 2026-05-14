@@ -1,6 +1,9 @@
 name: build
-run-name: Build PR (${{ github.event.client_payload.detail.pull_request }})
+run-name: Build (${{ github.event.client_payload.detail.pull_request || 'push-to-main' }})
 on:
+  push:
+    branches:
+      - main
   repository_dispatch:
     types:
       - dependency-review-success
@@ -22,6 +25,10 @@ jobs:
       issues: write
       statuses: write
     steps:
+      - name: step-security/harden-runner
+        uses: step-security/harden-runner@9ca718d3bf646d6534007c269a635b3e54cadf99 # v2.19.2
+        with:
+          egress-policy: audit
       - name: Build Pending
         uses: quotidian-ennui/actions-olio/commit-status-and-label@a23dce3e6ff1ea5b39cfefd23a604426be7868f1 # v1.1.4
         if: |
@@ -63,9 +70,15 @@ jobs:
     timeout-minutes: 2
     runs-on: ubuntu-latest
     name: Dependabot Merge
+    if: |
+      github.event.client_payload.base.actor == 'dependabot[bot]' && github.event.client_payload.base.ref == 'dependabot*'
     needs:
       - gradle
     steps:
+      - name: step-security/harden-runner
+        uses: step-security/harden-runner@9ca718d3bf646d6534007c269a635b3e54cadf99 # v2.19.2
+        with:
+          egress-policy: audit
       - name: "Create Token"
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token

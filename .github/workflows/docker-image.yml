@@ -32,6 +32,10 @@ jobs:
             dependency_graph: disabled
             dockerfile: ./src/main/docker/Dockerfile.native-micro
     steps:
+      - name: step-security/harden-runner
+        uses: step-security/harden-runner@9ca718d3bf646d6534007c269a635b3e54cadf99 # v2.19.2
+        with:
+          egress-policy: audit
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
