@@ -65,4 +65,4 @@ jobs:
           ghcr_image_name: ghcr.io/${{ github.repository }}
           ghcr_user: ${{ github.repository_owner }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-          caching: automatic
+          caching: local
