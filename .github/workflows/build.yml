@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Dependabot Merge
     if: |
-      github.event.client_payload.base.actor == 'dependabot[bot]' && github.event.client_payload.base.ref == 'dependabot*'
+      github.event.client_payload.base.actor == 'dependabot[bot]' 
     needs:
       - gradle
     steps:
