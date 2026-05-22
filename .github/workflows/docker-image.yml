@@ -42,7 +42,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Setup java
-        uses: quotidian-ennui/actions-olio/setup-java-gradle@a23dce3e6ff1ea5b39cfefd23a604426be7868f1 # v1.1.4
+        uses: quotidian-ennui/actions-olio/setup-java-gradle@0dda76889eea3575cf624cf7ffbb345322eda31b # v1.1.5
         with:
           java-version: "21"
           distribution: "temurin"
@@ -56,7 +56,7 @@ jobs:
         run: |
           ./gradlew --no-daemon build $BUILD_PROPERTIES
       - name: docker-build-push
-        uses: quotidian-ennui/actions-olio/docker-image-builder@a23dce3e6ff1ea5b39cfefd23a604426be7868f1 # v1.1.4
+        uses: quotidian-ennui/actions-olio/docker-image-builder@0dda76889eea3575cf624cf7ffbb345322eda31b # v1.1.5
         with:
           registry_push: true
           dockerfile: ${{ matrix.dockerfile }}
