@@ -21,28 +21,35 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    open-pull-requests-limit: 20
-    schedule:
-      interval: "daily"
-      time: "04:17"
-      timezone: "Europe/London"
-    rebase-strategy: disabled
     allow:
       - dependency-type: "all"
     commit-message:
-      prefix: "deps(ci): "
+      prefix: "deps(actions): "
+    open-pull-requests-limit: 20
+    schedule:
+      interval: "daily"
+      time: "05:13"
+      timezone: Europe/London
+    rebase-strategy: disabled
+    cooldown:
+      default-days: 3
+      exclude:
+        - "quotidian-ennui/*"
     groups:
       workflows-olio:
         patterns:
           - "quotidian-ennui/workflows-olio/*"
+
   - package-ecosystem: "docker"
     directory: "src/main/docker"
     open-pull-requests-limit: 20
+    rebase-strategy: disabled
+    cooldown:
+      default-days: 3
     schedule:
       interval: "daily"
       time: "04:17"
       timezone: "Europe/London"
-    rebase-strategy: disabled
     allow:
       - dependency-type: "all"
     commit-message:
