@@ -10,9 +10,8 @@ updates:
       semver-minor-days: 5
       semver-patch-days: 3
     schedule:
-      interval: "daily"
-      time: "04:12"
-      timezone: "Europe/London"
+      interval: "cron"
+      cronjob: "12 04 * * *"
     rebase-strategy: disabled
     allow:
       - dependency-type: "all"
@@ -27,9 +26,8 @@ updates:
       prefix: "deps(actions): "
     open-pull-requests-limit: 20
     schedule:
-      interval: "daily"
-      time: "05:13"
-      timezone: Europe/London
+      interval: "cron"
+      cronjob: "12 05 * * *"
     rebase-strategy: disabled
     cooldown:
       default-days: 3
@@ -47,9 +45,8 @@ updates:
     cooldown:
       default-days: 3
     schedule:
-      interval: "daily"
-      time: "04:17"
-      timezone: "Europe/London"
+      interval: "cron"
+      cronjob: "17 04 * * *"
     allow:
       - dependency-type: "all"
     commit-message:
