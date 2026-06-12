@@ -40,7 +40,7 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
       - name: Setup java
-        uses: quotidian-ennui/actions-olio/setup-java-gradle@c3db1eb13d426f7cf52137cb1780fa85ca0bf415 # v1.2.2
+        uses: quotidian-ennui/actions-olio/setup-java-gradle@20d61b495f9f57f9103dd8f052d5808370d5ce8b # v1.2.3
         with:
           java-version: "21"
           distribution: "temurin"

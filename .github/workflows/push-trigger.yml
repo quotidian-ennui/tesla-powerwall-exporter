@@ -23,6 +23,6 @@ jobs:
     name: Dispatch
     steps:
       - name: dispatch
-        uses: quotidian-ennui/actions-olio/pr-trigger@c3db1eb13d426f7cf52137cb1780fa85ca0bf415 # v1.2.2
+        uses: quotidian-ennui/actions-olio/pr-trigger@20d61b495f9f57f9103dd8f052d5808370d5ce8b # v1.2.3
         with:
           event_type: push-trigger
