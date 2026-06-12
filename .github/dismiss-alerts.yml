@@ -16,3 +16,17 @@
   comment: pinned by Quarkus BOM
   commentary: |-
     potentially a problem, but my local instance is _not exposed to the outside world_
+"CVE-2026-44893":
+  packages:
+    - io.netty:netty-codec-haproxy
+  reason: tolerable_risk
+  comment: pinned by Quarkus BOM
+  commentary: |-
+    potentially a problem, but my local instance is _not exposed to the outside world_
+"CVE-2026-44249":
+  packages:
+    - io.netty:netty-handler
+  reason: tolerable_risk
+  comment: pinned by Quarkus BOM
+  commentary: |-
+    potentially a problem, but my local instance is _not exposed to the outside world_; also we do not have access controls by filtering.
