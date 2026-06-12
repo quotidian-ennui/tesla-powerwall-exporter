@@ -28,7 +28,18 @@ jobs:
       - name: step-security/harden-runner
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
-          egress-policy: audit
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            downloads.gradle.org:443
+            github.com:443
+            plugins-artifacts.gradle.org:443
+            plugins.gradle.org:443
+            release-assets.githubusercontent.com:443
+            repo.maven.apache.org:443
+            services.gradle.org:443
+            registry.quarkus.io:443
       - name: Build Pending
         uses: quotidian-ennui/actions-olio/commit-status-and-label@20d61b495f9f57f9103dd8f052d5808370d5ce8b # v1.2.3
         if: |
@@ -71,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Dependabot Merge
     if: |
-      github.event.client_payload.base.actor == 'dependabot[bot]' 
+      github.event.client_payload.base.actor == 'dependabot[bot]'
     needs:
       - gradle
     steps:
