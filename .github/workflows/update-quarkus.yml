@@ -2,7 +2,7 @@ name: quarkus-update
 on:
   workflow_dispatch: null
   schedule:
-    - cron: "15 03 * * MON"
+    - cron: "15 03 * * 2,4,6"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
