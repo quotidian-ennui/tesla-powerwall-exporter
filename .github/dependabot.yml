@@ -37,6 +37,9 @@ updates:
       workflows-olio:
         patterns:
           - "quotidian-ennui/workflows-olio/*"
+      actions-olio:
+        patterns:
+          - "quotidian-ennui/actions-olio/*"
 
   - package-ecosystem: "docker"
     directory: "src/main/docker"
