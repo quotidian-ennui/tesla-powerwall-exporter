@@ -41,6 +41,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
       - name: Get Token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -51,47 +52,49 @@ jobs:
           repositories: "${{ github.event.repository.name}}"
           permission-contents: write
           permission-pull-requests: write
+
       - name: Setup java
-        uses: quotidian-ennui/actions-olio/setup-java-gradle@20d61b495f9f57f9103dd8f052d5808370d5ce8b # v1.2.3
+        uses: quotidian-ennui/actions-olio/setup-java-gradle@528d118cf867515584403396edee8a564a23bc00 # v1.3.0
         with:
           java-version: "21"
           distribution: "temurin"
+
       - name: Current Quarkus Version
         id: currentQuarkus
         run: |
           quarkusVersion=$(grep '^quarkusPlatformVersion=' gradle.properties | cut -d'=' -f2)
-          echo "release=$quarkusVersion"  >> "$GITHUB_OUTPUT"
-      # see https://gist.github.com/bitmvr/9ed42e1cc2aac799b123de9fdc59b016 to do it all in bash?
-      - name: Current Quarkus SEMVER
-        id: q_semver_current
-        uses: release-kit/semver@97491c46500b6e758ced599794164a234b8aa08c # v2.0.7
-        with:
-          string: "${{ steps.currentQuarkus.outputs.release }}"
+          echo "release=$quarkusVersion" | tee -a "$GITHUB_OUTPUT"
+
       - name: Run QuarkusUpdate
         id: quarkusUpdate
         run: |
           ./gradlew --no-daemon quarkusUpdate --rewrite
+
       - name: Updated Quarkus Version
         id: latestQuarkus
         run: |
           quarkusVersion=$(grep '^quarkusPlatformVersion=' gradle.properties | cut -d'=' -f2)
-          echo "release=$quarkusVersion"  >> "$GITHUB_OUTPUT"
-      - name: Latest Quarkus SEMVER
-        id: q_semver_latest
-        uses: release-kit/semver@97491c46500b6e758ced599794164a234b8aa08c # v2.0.7
+          echo "release=$quarkusVersion" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Diff Quarkus Versions
+        id: semverDiff
+        uses: quotidian-ennui/actions-olio/semver-diff@528d118cf867515584403396edee8a564a23bc00 # v1.3.0
         with:
-          string: "${{ steps.latestQuarkus.outputs.release }}"
+          first: ${{ steps.currentQuarkus.outputs.release }}
+          second: ${{ steps.latestQuarkus.outputs.release }}
+          type-major: feat(quarkus)!
+          type-minor: feat(quarkus)
+          type-patch: deps(quarkus)
+
       - name: Build PR title
         id: pr_title
+        env:
+          QUARKUS_CURRENT: ${{ steps.currentQuarkus.outputs.release }}
+          QUARKUS_LATEST: ${{ steps.latestQuarkus.outputs.release }}
+          CONVENTIONAL_COMMIT: ${{ steps.semverDiff.outputs.commit-type }}
         run: |
-          msg="bump quarkus from ${{ steps.currentQuarkus.outputs.release }} to ${{ steps.latestQuarkus.outputs.release }}"
-          if [[ "${{ steps.q_semver_latest.outputs.major }}" != "${{ steps.q_semver_current.outputs.major }}" ]]; then
-            echo "msg=feat(quarkus)!: $msg" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ steps.q_semver_latest.outputs.minor }}" != "${{ steps.q_semver_current.outputs.minor }}" ]]; then
-            echo "msg=feat(quarkus): $msg" >> "$GITHUB_OUTPUT"
-          else
-            echo "msg=deps(quarkus): $msg" >> "$GITHUB_OUTPUT"
-          fi
+          echo "msg=$CONVENTIONAL_COMMIT: bump quarkus from $QUARKUS_CURRENT to $QUARKUS_LATEST" | tee -a "$GITHUB_OUTPUT"
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
