@@ -41,7 +41,7 @@ jobs:
             services.gradle.org:443
             registry.quarkus.io:443
       - name: Build Pending
-        uses: quotidian-ennui/actions-olio/commit-status-and-label@20d61b495f9f57f9103dd8f052d5808370d5ce8b # v1.2.3
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@528d118cf867515584403396edee8a564a23bc00 # v1.3.0
         if: |
           github.event.client_payload.detail.pull_request != '' &&
           github.event.client_payload.base.sha != ''
@@ -70,7 +70,7 @@ jobs:
           (success() || failure()) &&
           github.event.client_payload.detail.pull_request != '' &&
           github.event.client_payload.base.sha != ''
-        uses: quotidian-ennui/actions-olio/commit-status-and-label@20d61b495f9f57f9103dd8f052d5808370d5ce8b # v1.2.3
+        uses: quotidian-ennui/actions-olio/commit-status-and-label@528d118cf867515584403396edee8a564a23bc00 # v1.3.0
         with:
           state: ${{ steps.gradle.outcome }}
           sha: ${{ github.event.client_payload.base.sha }}
