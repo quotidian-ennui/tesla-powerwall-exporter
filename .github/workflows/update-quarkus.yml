@@ -54,7 +54,7 @@ jobs:
           permission-pull-requests: write
 
       - name: Setup java
-        uses: quotidian-ennui/actions-olio/setup-java-gradle@528d118cf867515584403396edee8a564a23bc00 # v1.3.0
+        uses: quotidian-ennui/actions-olio/setup-java-gradle@553ec3b65772a6de54db9a6f48f07c16a7bd3823 # v1.3.1
         with:
           java-version: "21"
           distribution: "temurin"
@@ -78,7 +78,7 @@ jobs:
 
       - name: Diff Quarkus Versions
         id: semverDiff
-        uses: quotidian-ennui/actions-olio/semver-diff@528d118cf867515584403396edee8a564a23bc00 # v1.3.0
+        uses: quotidian-ennui/actions-olio/semver-diff@553ec3b65772a6de54db9a6f48f07c16a7bd3823 # v1.3.1
         with:
           first: ${{ steps.currentQuarkus.outputs.release }}
           second: ${{ steps.latestQuarkus.outputs.release }}
