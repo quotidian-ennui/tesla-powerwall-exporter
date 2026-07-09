@@ -23,7 +23,7 @@ updates:
     allow:
       - dependency-type: "all"
     commit-message:
-      prefix: "deps(actions): "
+      prefix: "build(actions): "
     open-pull-requests-limit: 20
     schedule:
       interval: "cron"
