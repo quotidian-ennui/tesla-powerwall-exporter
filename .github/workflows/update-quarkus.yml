@@ -59,6 +59,10 @@ jobs:
           java-version: "21"
           distribution: "temurin"
 
+      - name: "Setup updatecli"
+        id: setup-updatecli
+        uses: updatecli/updatecli-action@ca8c01bf875e2520512c344a71dd02f3dc3326a7 # v3.7.0
+
       - name: Current Quarkus Version
         id: currentQuarkus
         run: |
@@ -68,7 +72,7 @@ jobs:
       - name: Run QuarkusUpdate
         id: quarkusUpdate
         run: |
-          ./gradlew --no-daemon quarkusUpdate --rewrite
+          updatecli compose apply
 
       - name: Updated Quarkus Version
         id: latestQuarkus

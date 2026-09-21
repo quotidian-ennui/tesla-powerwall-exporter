@@ -1,0 +1,45 @@
+# {{ $scmEnabled := and (env "GITHUB_REPOSITORY_OWNER") (env "GITHUB_REPOSITORY_NAME") }}
+
+name: Update Quarkus
+pipelineid: quarkus_update
+version: 0.121.0
+
+sources:
+  quarkus:
+    name: GitHub releases for quarkus
+    kind: githubrelease
+    spec:
+      age:
+        minimum: 3d
+      owner: quarkusio
+      repository: quarkus
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      versionfilter:
+        kind: regex/semver
+        # Should catch hotfix patch releases with this regex.
+        regex: "([0-9]+\\.[0-9]+\\.[0-9]+).*$"
+        pattern: "*"
+
+conditions:
+  quarkus:
+    name: Maven artifact release for quarkus
+    kind: maven
+    spec:
+      repositories:
+        - "repo1.maven.org/maven2"
+      groupid: "io.quarkus.platform"
+      artifactid: "quarkus-bom-quarkus-platform-descriptor"
+
+targets:
+  quarkusUpdate:
+    name: Update Quarkus to {{ source "quarkus" }}
+    kind: shell
+    sourceid: quarkus
+    spec:
+      shell: bash
+      command: ./.updatecli/scripts/quarkus-update.sh
+      environments:
+        - name: PATH
+        # {{ if env "GRADLE_USER_HOME"}}
+        - name: GRADLE_USER_HOME
+        # {{ end }}
