@@ -33,8 +33,10 @@ jobs:
             plugins.gradle.org:443
             release-assets.githubusercontent.com:443
             repo.maven.apache.org:443
+            repo1.maven.org:443
             services.gradle.org:443
             registry.quarkus.io:443
+            www.updatecli.io:443
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -58,6 +60,9 @@ jobs:
         with:
           java-version: "21"
           distribution: "temurin"
+          writeable: false
+          gradle-job-summary: never
+          gradle-dependency-graph: disabled
 
       - name: "Setup updatecli"
         id: setup-updatecli
@@ -71,6 +76,9 @@ jobs:
 
       - name: Run QuarkusUpdate
         id: quarkusUpdate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_DISABLE_VERSION_CHECK: true
         run: |
           updatecli compose apply
 
