@@ -1,0 +1,4 @@
+policies:
+  - name: Local Updatecli policies
+    config:
+      - .updatecli/updatecli.d
