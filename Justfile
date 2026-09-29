@@ -233,14 +233,6 @@ build style="native":
 @run: check_tesla_env
     ./gradlew {{ GRADLE_OPTS }} -Dorg.gradle.daemon=false -Dorg.gradle.console=plain quarkusRun
 
-# pin workflows using pinact
-[group("housekeeping")]
-[script]
-gha *args="":
-    pinact run {{ args }}
-
-alias pin-actions := gha
-
 # Generate and append vulnerability dismissals for tesla-powerwall-exporter
 [group("housekeeping")]
 [script]
