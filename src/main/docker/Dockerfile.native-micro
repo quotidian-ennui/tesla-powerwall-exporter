@@ -17,7 +17,7 @@
 # docker run -i --rm -p 8080:8080 quarkus/tesla
 #
 ###
-FROM quay.io/quarkus/ubi10-quarkus-micro-image:2.0-2026-10-27@sha256:6406040346de6c6d4352ac744dc56a72fd0a4870c86c61ac7863ab18d37fb908
+FROM quay.io/quarkus/ubi10-quarkus-micro-image:2.0-2026-11-01@sha256:c31ea8e5c1f79c8a35abd70fe078bd06b7f27923e54cac307f9ed90fbe617825
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \
