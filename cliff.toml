@@ -109,6 +109,7 @@ commit_parsers = [
     { message = "^deps", group = "<!-- 07 -->📌 Dependency Management" },
     { message = "^chore\\(deps\\)", group = "<!-- 07 -->📌 Dependency Management" },
     { message = "^chore\\(release\\):", skip = true },
+    { message = "^chore\\(security\\):", group = "<!-- 00 -->🛡️ Security" },
     { message = "^release:", skip = true },
     { message = "^Merge branch '", skip = true },
     { message = "^Initial commit", skip = true },
