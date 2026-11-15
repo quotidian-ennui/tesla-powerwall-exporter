@@ -131,7 +131,7 @@ publish type="native": clean
 # Tag & release
 [group("release")]
 [script]
-release push="localonly":
+please-release push="github":
     #
     # shellcheck disable=SC1083
     set -eo pipefail
@@ -159,6 +159,8 @@ release push="localonly":
       *)
         ;;
     esac
+
+alias release := please-release
 
 # Print the current calculated version
 [group("release")]
