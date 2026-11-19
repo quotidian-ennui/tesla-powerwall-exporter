@@ -64,7 +64,7 @@ jobs:
       - name: Setup java
         uses: quotidian-ennui/actions-olio/setup-java-gradle@c2791f686b05ea34186b2a006ae563c7a03283e4 # v1.3.8
         with:
-          java-version: "21"
+          java-version: "25"
           distribution: "temurin"
           gradle-dependency-graph: ${{ matrix.dependency_graph }}
           writeable: ${{ matrix.gradle_cache == 'enabled' }}

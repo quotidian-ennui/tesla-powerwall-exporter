@@ -178,16 +178,19 @@ version:
 @clean:
     rm -rf node_modules build bin
     -docker images --format json | jq -c '{ image: .Repository, tag: .Tag, id: .ID }' | grep -e "<none>" -e "{{ LOCAL_DOCKER_CONTAINER }}" | jq -r '.id' | xargs -r docker rmi
+    -docker image prune -f
 
 # Do a build perhaps in the style of jar|uber|native
 [group("build")]
 [script]
-build style="native":
+build style="native" pull_policy="missing":
     #
     # shellcheck disable=SC1083
     set -eo pipefail
 
-    style="{{ style }}"
+    readonly style="{{ style }}"
+    readonly pull_policy="{{ pull_policy }}"
+
     case "$style" in
       jar)
         ./gradlew {{ GRADLE_OPTS }} build
@@ -196,14 +199,14 @@ build style="native":
         ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_UBER_OPTS }}
         ;;
       native)
-        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_NATIVE_OPTS }}
+        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_NATIVE_OPTS }} -Dquarkus.native.builder-image.pull="$pull_policy"
         ;;
       *)
         echo "Unknown build style: $style"
         echo ""
-        echo "just build jar   : builds a jar using default configuration"
-        echo "just build uber  : builds an uber-jar"
-        echo "just build native: build a native executable"
+        echo "just build jar                           : builds a jar using default configuration"
+        echo "just build uber                          : builds an uber-jar"
+        echo "just build native (always|missing|never) : build a native executable with the corresponding image policy"
         echo ""
         exit 0
         ;;
