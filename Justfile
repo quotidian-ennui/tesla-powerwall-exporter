@@ -10,6 +10,7 @@ DOCKER_IMAGE_TAG := `whoami` / LOCAL_DOCKER_CONTAINER + ":latest"
 GRADLE_NATIVE_OPTS := "-Dquarkus.package.jar.enabled=false -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true -Dquarkus.native.container-runtime=docker"
 GRADLE_UBER_OPTS := "-Dquarkus.package.jar.enabled=true -Dquarkus.package.jar.type=uber-jar"
 GRADLE_ENABLE_SPOTLESS := "-PdisableSpotlessJava=false -PdisableSpotlessGradle=false"
+QUARKUS_APP_PROPERTIES := justfile_directory() / "src/main/resources/application.properties"
 
 # Set this to be --no-problems-report for 8.12+
 
@@ -46,11 +47,12 @@ docker action="help": check_tesla_env
     if [[ "$#" -ne "0" ]]; then shift; fi
     case "$action" in
       uber)
-        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_UBER_OPTS }}
+        just build uber
         docker build --pull -t "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_UBER }}" .
         ;;
       build|native)
-        ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_NATIVE_OPTS }}
+        # pull the image because we're building a docker image.
+        just build native pull
         docker build --pull -t  "{{ DOCKER_IMAGE_TAG }}" -f "{{ DOCKERFILE_NATIVE }}" .
         ;;
       latest)
@@ -189,7 +191,18 @@ build style="native" pull_policy="missing":
     set -eo pipefail
 
     readonly style="{{ style }}"
-    readonly pull_policy="{{ pull_policy }}"
+    readonly quarkusProperties="{{ QUARKUS_APP_PROPERTIES }}"
+    pull_policy="{{ pull_policy }}"
+
+    case "$pull_policy" in
+    pull)
+      image=$(cat "$quarkusProperties" | grep "quarkus.native.builder-image=" | cut -f 2 -d'=')
+      docker pull "$image"
+      pull_policy="missing"
+      ;;
+    *)
+      ;;
+    esac
 
     case "$style" in
       jar)
@@ -202,13 +215,11 @@ build style="native" pull_policy="missing":
         ./gradlew {{ GRADLE_OPTS }} build {{ GRADLE_NATIVE_OPTS }} -Dquarkus.native.builder-image.pull="$pull_policy"
         ;;
       *)
-        echo "Unknown build style: $style"
-        echo ""
-        echo "just build jar                           : builds a jar using default configuration"
-        echo "just build uber                          : builds an uber-jar"
-        echo "just build native (always|missing|never) : build a native executable with the corresponding image policy"
-        echo ""
-        exit 0
+        echo -e "Unknown build style: $style\n"
+        echo -e "just build jar    : builds a jar using default configuration"
+        echo -e "just build uber   : builds an uber-jar"
+        echo -e "just build native : build a native executable with the corresponding image policy"
+        echo -e "                    native allows (pull|always|missing|never) as the pull_policy\n"
         ;;
     esac
 
