@@ -1,0 +1,58 @@
+# {{ $scmEnabled := and (env "GITHUB_REPOSITORY_OWNER") (env "GITHUB_REPOSITORY_NAME") }}
+name: Update Quarkus native builder image
+pipelineid: quarkus_builder_image_update
+version: 0.121.0
+
+# {{ if $scmEnabled }}
+actions:
+  pull_request:
+    scmid: github
+    title: 'build(native): Bump native builder image to {{ source "builderImage" }}'
+    kind: github/pullrequest
+    mergemethod: "squash"
+    spec:
+      labels:
+        - dependencies
+
+scms:
+  github:
+    disabled: false
+    kind: github
+    spec:
+      branch: main
+      owner: '{{ requiredEnv "GITHUB_REPOSITORY_OWNER" }}'
+      repository: '{{ requiredEnv "GITHUB_REPOSITORY_NAME" }}'
+      user: '{{ requiredEnv "UPDATECLI_GITHUB_USER" }}'
+      email: '{{ requiredEnv "UPDATECLI_GITHUB_EMAIL" }}'
+      username: '{{ requiredEnv "UPDATECLI_GITHUB_USER" }}'
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      commitmessage:
+        type: "build"
+        scope: "native"
+        title: 'Bump native builder image to {{ source "builderImage" }}'
+        hidecredit: true
+# {{ end }}
+
+sources:
+  builderImage:
+    name: Latest JDK 25 Mandrel builder image tag
+    kind: dockerimage
+    spec:
+      image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image
+      versionfilter:
+        kind: regex/semver
+        regex: "^jdk-(25\\.[0-9]+\\.[0-9]+)$"
+        pattern: "*"
+
+targets:
+  builderImage:
+    name: Update native builder image to {{ source "builderImage" }}
+    kind: file
+    sourceid: builderImage
+    # {{ if $scmEnabled }}
+    scmid: github
+    # {{ end }}
+    spec:
+      file: src/main/resources/application.properties
+      matchpattern: "ubi-quarkus-mandrel-builder-image:jdk-[0-9.]+"
+      replacepattern: 'ubi-quarkus-mandrel-builder-image:{{ source "builderImage" }}'

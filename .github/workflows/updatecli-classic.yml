@@ -1,0 +1,39 @@
+name: updatecli
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 03 * * 1,3,5"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  updatecli:
+    name: Run updatecli
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: step-security/harden-runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - name: "Checkout"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: "Create Token"
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: app-token
+        with:
+          client-id: ${{ vars.WORKFLOW_UPDATE_CLIENT_ID }}
+          private-key: ${{ secrets.WORKFLOW_UPDATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: "${{ github.event.repository.name}}"
+      - name: updatecli
+        uses: quotidian-ennui/actions-olio/default-updatecli@b297584a2aef0a4136c4bff54c639d468e9f6a30 # v1.3.7
+        with:
+          token: ${{ steps.app-token.outputs.token }}

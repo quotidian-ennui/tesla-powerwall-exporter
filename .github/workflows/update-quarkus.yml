@@ -81,7 +81,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATECLI_DISABLE_VERSION_CHECK: true
         run: |
-          updatecli compose apply
+          updatecli apply --config ".updatecli/updatecli.custom/quarkus-update.yaml"
 
       - name: Updated Quarkus Version
         id: latestQuarkus
