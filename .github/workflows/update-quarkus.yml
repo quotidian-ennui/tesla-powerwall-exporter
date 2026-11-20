@@ -35,6 +35,7 @@ jobs:
             repo.maven.apache.org:443
             repo1.maven.org:443
             services.gradle.org:443
+            quay.io:443
             registry.quarkus.io:443
             www.updatecli.io:443
 

@@ -55,6 +55,7 @@ jobs:
             services.gradle.org:443
             registry.quarkus.io:443
             registry.access.redhat.com:443
+            tuf-repo-cdn.sigstore.dev:443
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
