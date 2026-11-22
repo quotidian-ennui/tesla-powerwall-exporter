@@ -1,0 +1,64 @@
+name: cache-builder-image
+description: Cache a container image as a docker save tarball via actions/cache
+
+inputs:
+  image:
+    description: Fully qualified image reference to cache, e.g. quay.io/org/image:tag
+    required: true
+  enabled:
+    description: Set to 'false' to skip all steps.
+    required: false
+    default: "true"
+  tar-path:
+    description: Path of the intermediate tarball. Defaults to $RUNNER_TEMP/builder-image.tar.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve cache key and tar path
+      id: resolve
+      if: inputs.enabled == 'true'
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAR_PATH: ${{ inputs.tar-path }}
+        RUNNER_OS: ${{ runner.os }}
+      run: |
+        {
+          echo "key=builder-${RUNNER_OS}-$(echo "$IMAGE" | tr '/:' '--')"
+          echo "tar=${TAR_PATH:-$RUNNER_TEMP/builder-image.tar}"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Restore image cache
+      id: cache
+      if: inputs.enabled == 'true'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.resolve.outputs.tar }}
+        key: ${{ steps.resolve.outputs.key }}
+
+    - name: Load image from cache
+      if: inputs.enabled == 'true' && steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      env:
+        TAR: ${{ steps.resolve.outputs.tar }}
+      run: docker load -i "$TAR"
+
+    - name: Pull and save image
+      if: inputs.enabled == 'true' && steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAR: ${{ steps.resolve.outputs.tar }}
+      run: |
+        docker pull "$IMAGE"
+        docker save -o "$TAR" "$IMAGE"
+
+    - name: Save image cache
+      if: inputs.enabled == 'true' && steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.resolve.outputs.tar }}
+        key: ${{ steps.resolve.outputs.key }}

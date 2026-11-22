@@ -70,6 +70,14 @@ jobs:
           distribution: "temurin"
           gradle-dependency-graph: ${{ matrix.dependency_graph }}
           writeable: ${{ matrix.gradle_cache == 'enabled' }}
+      - name: Resolve builder image
+        id: native-builder
+        run: echo "image=$(grep -oP '^quarkus\.native\.builder-image=\K.*' src/main/resources/application.properties)" >> "$GITHUB_OUTPUT"
+      - name: Cache builder image
+        uses: $/.github/actions/cache-builder-image
+        with:
+          image: ${{ steps.native-builder.outputs.image }}
+          enabled: ${{ matrix.docker_target == 'native' }}
       - name: Build
         id: build
         env:
