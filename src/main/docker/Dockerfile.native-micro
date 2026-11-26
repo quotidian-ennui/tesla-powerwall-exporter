@@ -1,4 +1,4 @@
-FROM quay.io/quarkus/quarkus-distroless-image:2.0-2026-11-22@sha256:972b3c0b5343e7db28ca6b39d1023f7f95bb9aa42270a03384cc5cf28b6db13f
+FROM quay.io/quarkus/quarkus-distroless-image:2.0-2026-11-25@sha256:83440820e28d18f03afd07d10e65f5b9d702d1952ea6d4f58b9af94225aadc98
 COPY build/*-runner /application
 
 EXPOSE 9961
